@@ -4,6 +4,12 @@ class Wall():
         self.paint = paint
         self.shape = shape
         self.surface_area = surface_area
+        self.paint_required = self.calculate_required_volume()
+        # self.coats = coats
+        # self.protrustions = []
+    
+    def calculate_required_volume(self):
+        return self.surface_area / self.paint.coverage_per_unit
 
 
 ### A paint bucket
@@ -11,6 +17,7 @@ class Paint():
     def __init__(self, colour, rate_per_unit):
         self.colour = colour
         self.coverage_per_unit = rate_per_unit
+        # self.volume_per_bucket = volume_per_bucket
 
 class Calculator():
     def __init__(self):
@@ -18,11 +25,7 @@ class Calculator():
         temp_paint = Paint(paint_details[0], paint_details[1])
 
         wall_details = self.get_wall_details()
-        self.wall = Wall(wall_details[0], wall_details[1], temp_paint)
-
-    def calculate_required_volume(self):
-        return self.wall.surface_area / self.wall.paint.coverage_per_unit
-
+        self.Walls = [Wall(wall_details[0], wall_details[1], temp_paint)]
 
     def get_wall_details(self):
         from enum import Enum
@@ -97,7 +100,7 @@ class Calculator():
             wall_surface_area = wall_shape(radius_metres)
 
         print("The surface area of this wall is: %.2f metres squared" % wall_surface_area) if wall_surface_area is not None else print("Surface area has not been calculated correctly!")
-        return [wall_shape, wall_surface_area]
+        return (wall_shape, wall_surface_area)
 
     def get_float_input(self, question):
         user_input = ""
@@ -130,13 +133,15 @@ class Calculator():
 
         paint_coverage = self.get_float_input("Please enter the many square meters your paint can cover per litre of paint: ")
 
-        return [paint_name, paint_coverage]
+        return (paint_name, paint_coverage)
 
 
 if __name__ == '__main__':
     # Create calculator object
     calculator = Calculator()
-    print("For the specified wall, you would need %.2f litres of the %s paint" % (calculator.calculate_required_volume(), calculator.wall.paint.colour))
+    for wall in calculator.Walls:
+        print("For the specified wall, you would need %.2f litres of the %s paint" % (wall.paint_required, wall.paint.colour))
+    
 
 # GUI (Do last): https://realpython.com/pysimplegui-python/
 
@@ -149,6 +154,9 @@ if __name__ == '__main__':
 # Simple GUI
 # Maybe store the walls as rooms. Do this after I have multiple walls implemented 
 # Once paints are tied to individual walls, ask how many coats need to be applied. 
+# Cost of paint
+# Paint colours as enum
+# Convert lists into tuples
 
 
 # Assumptions :
