@@ -214,7 +214,9 @@ class Room():
         self.__name = "default room"
         self.__index = 0
     
-    def set_name(self, room_index): 
+
+
+    def define(self, room_index):
         import PySimpleGUI as sg
         import sys
         
@@ -222,8 +224,11 @@ class Room():
         
         layout = [
                 [sg.Text("Room No.%d" % self.__index)], 
-                [sg.Text("Please enter a name for this room: ")], 
-                [sg.Multiline(size=(30,5), key='textbox')], 
+                [sg.Text("Please enter the details of this room ")], 
+                [sg.Text("Room name: ")], 
+                [sg.Multiline(size=(30,1), key='name')], 
+                [sg.Text("Number of walls: ")], 
+                [sg.Multiline(size=(30,1), key='walls')], 
                 [sg.Button("CONFIRM")],
                 [sg.Button("CLOSE")]
             ] 
@@ -234,7 +239,8 @@ class Room():
             event, values = window.read()
             match event:
                 case "CONFIRM":
-                    self.__name = values['textbox']
+                    self.__name = values['name']
+                    self.__walls = [Wall] * get_int_input(values['walls'], window)
                     break 
                 case None:
                     sys.exit()
@@ -243,31 +249,41 @@ class Room():
                 case _: 
                     pass
         window.close()
-         
-    def define(self, room_index):
-        self.__index = room_index
         
-        clear_console()
+    def populate_room(self): 
+        import PySimpleGUI as sg
+        import sys
         
-        print("Current Room: %s" % self.__name)  
-        num_of_walls = get_int_input("Please enter the number of walls for this room: ")
+        for wall in self.__walls:
+            
+        
+        layout = [
+                [sg.Text("Room No.%d" % self.__index)], 
+                [sg.Text("Please enter the details of this room ")], 
+                [sg.Text("Room name: ")], 
+                [sg.Multiline(size=(30,1), key='name')], 
+                [sg.Text("Number of walls: ")], 
+                [sg.Multiline(size=(30,1), key='walls')], 
+                [sg.Button("CONFIRM")],
+                [sg.Button("CLOSE")]
+            ] 
+                
+        window = sg.Window("Paint Calculator", layout)
         
         while True:
-            try:
-                self.__walls = [Wall()] * num_of_walls
-                break
-            except: 
-                num_of_walls = get_int_input("Error! Please enter the number of walls for this room as a whole number: ")
-        
-        index = 1
-        for wall in self.__walls:
-            print("Current Room: %s" % self.__name) 
-            wall.define(index)
-            index += 1
-            clear_console()
-            
-    def walls(self):
-        return self.__walls
+            event, values = window.read()
+            match event:
+                case "CONFIRM":
+                    self.__name = values['name']
+                    self.__walls = [Wall] * get_int_input(values['walls'], window)
+                    break 
+                case None:
+                    sys.exit()
+                case "CLOSE":
+                    sys.exit()
+                case _: 
+                    pass
+        window.close()
 
 # The Calculator
 class Calculator():
@@ -283,14 +299,16 @@ class Calculator():
         
         room_index = 1
         for room in self.__rooms: 
-            room.set_name(room_index)
+            room.define(room_index)
             room_index += 1
-        
         
         shape_types = [['Shape', ["Square", "Rectangle", "Parallelogram", "Trapezoid", "Triangle", "Ellipse", "Cirlce", "Semicircle"]]]
 
         # Define UI elements
-        layout = [[ui.Menu(shape_types, text_color="black", font="SYSTEM_DEFAULT", pad=(10,10))]]
+        layout = [
+                [ui.Menu(self.__rooms, text_color="black", font="SYSTEM_DEFAULT", pad=(10,10))], 
+                [ui.Menu(shape_types, text_color="black", font="SYSTEM_DEFAULT", pad=(10,10))]
+            ]
         window = ui.Window("Paint Calculator", layout)
 
         while True:
@@ -311,7 +329,7 @@ class Calculator():
                     layout = [
                         [ui.Menu(shape_types, text_color="black", font="SYSTEM_DEFAULT", pad=(10,10))] ,
                         [sg.Text('Please enter the length of one side of your wall in metres:')], 
-                        [sg.Multiline(size=(30,5), key='length')], 
+                        [sg.Multiline(size=(30,1), key='length')], 
                         [sg.Button("CONFIRM")], 
                         [sg.Button("CLOSE")]
                     ]
@@ -334,7 +352,7 @@ class Calculator():
         import PySimpleGUI as sg
         import sys
         
-        layout = [[sg.Text('Please enter the number of rooms you wish to paint in the box below:')], [sg.Multiline(size=(30,5), key='textbox')], [sg.Button("CONFIRM")], [sg.Button("CLOSE")]] 
+        layout = [[sg.Text('Please enter the number of rooms you wish to paint in the box below:')], [sg.Multiline(size=(30,1), key='textbox')], [sg.Button("CONFIRM")], [sg.Button("CLOSE")]] 
         window = sg.Window("Paint Calculator", layout)
         
         while True:
@@ -400,7 +418,7 @@ def get_int_input(usr_input, window):
             valid_input = False
 
         if not valid_input or user_input <= 0:
-            layout = [[sg.Text('Error: Please enter a positive, non-zero, whole number:')], [sg.Multiline(size=(30,5), key='textbox')], [sg.Button("CONFIRM")], [sg.Button("CLOSE")]]
+            layout = [[sg.Text('Error: Please enter a positive, non-zero, whole number:')], [sg.Multiline(size=(30,1), key='textbox')], [sg.Button("CONFIRM")], [sg.Button("CLOSE")]]
             window.close()
             window = sg.Window("Paint Calculator", layout) 
         elif valid_input:
