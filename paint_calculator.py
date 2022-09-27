@@ -73,16 +73,14 @@ class Architecture():
         pass
 
     def __get_shape(self):
-        valid_input = False
-        
-        while not valid_input:
+        while True:
             print("Square | Rectangle | Parallelogram | Trapezoid | Triangle | Ellipse | Circle | Semicircle")
             wall_shape = input("Of the shapes listed above, which best describes the shape of this %s?: "% type(self).__name__.lower()).lower()
 
             shape_type = Shape.to_shape(wall_shape)
             if shape_type is not None:
                 wall_shape = shape_type
-                valid_input = True
+                break
             else:
                 print("Invalid Shape!")
         
@@ -95,15 +93,26 @@ class Architecture():
         if shape is Shape.SQUARE:
             base_metres = get_float_input("Please enter the length of one side in metres: ")
             wall_surface_area = shape(base_metres)
+            
         elif shape is Shape.RECTANGLE or shape is Shape.PARALLELOGRAM or shape is Shape.TRIANGLE:
-            base_metres = get_float_input("Please enter the length of the base in metres: ")
-            height_metres = get_float_input("Please enter the the height in metres: ")
-            wall_surface_area = shape(base_metres, height_metres)
+            prompts = [
+                "Please enter the length of the base in metres: ",
+                "Please enter the the height in metres: "
+            ]
+            
+            answers = get_multi_float(prompts)
+            wall_surface_area = shape(answers[0], answers[1])
+            
         elif shape is Shape.TRAPEZOID:
-            base_metres = get_float_input("Please enter the length of the base in metres: ")
-            top_metres = get_float_input("Please enter the length of the top in metres: ")
-            height_metres = get_float_input("Please enter the the height in metres: ")
-            wall_surface_area = shape(base_metres, height_metres, top_metres)
+            prompts = [
+                "Please enter the length of the base in metres: ",
+                "Please enter the length of the top in metres: ",
+                "Please enter the the height in metres: "
+            ]
+             
+            answers = get_multi_float(prompts)
+            wall_surface_area = shape(answers[0], answers[2], answers[1])
+            
         elif shape is Shape.ELLIPSE:
             vertical_metres = get_float_input("Please enter the vertical radius of in metres: ")
             horizontal_metres = get_float_input("Please enter the horizontal radius in metres: ")
@@ -151,11 +160,10 @@ class Wall(Architecture):
     
     def __get_obstacles(self):
         num_of_obstacles = get_int_input("Please enter the number of obstacles (doors/windows) on this wall: ")
-        valid_input = False
-        while not valid_input:
+        while True:
             try:
                 obstacles = [Obstacle()] * num_of_obstacles
-                valid_input = True 
+                break
             except: 
                 num_of_obstacles = get_int_input("Error! Please enter the number of obstacles (doors/windows) on this wall as a whole number: ")
         
@@ -173,17 +181,16 @@ class Wall(Architecture):
             self.__surface_area -= obstacle.area()
         
     def __get_paint(self): 
-        valid_input = False
         print("Wall No.%d" % self.__index)
         
-        while not valid_input:
+        while True:
             print("Red | Green | Blue")
             colour = input("Of the colours listed above, which do you want to use on your wall? ").lower()
 
             paint_colour = Paint.to_paint(colour)
             if paint_colour is not None:
                 colour = paint_colour
-                valid_input = True
+                break
             else:
                 print("Invalid colour!")
         
@@ -216,11 +223,10 @@ class Room():
         print("Current Room: %s" % self.__name)  
         num_of_walls = get_int_input("Please enter the number of walls for this room: ")
         
-        valid_input = False
-        while not valid_input:
+        while True:
             try:
                 self.__walls = [Wall()] * num_of_walls
-                valid_input = True 
+                break
             except: 
                 num_of_walls = get_int_input("Error! Please enter the number of walls for this room as a whole number: ")
         
@@ -250,11 +256,10 @@ class Calculator():
     def __get_rooms(self):  
         num_of_rooms = get_int_input("How many rooms are you wanting to paint? ")
         
-        valid_input = False
-        while not valid_input:
+        while True:
             try:
                 rooms = [Room()] * num_of_rooms
-                valid_input = True 
+                break
             except: 
                 num_of_rooms = get_int_input("Error! Please enter the number of rooms you are wanting to paint as a whole number: ")
         
@@ -270,29 +275,35 @@ class Calculator():
 
 def get_float_input(question):
     user_input = ""
-    valid_input = False
-    while not valid_input:
+    while True:
         try:
             user_input = float(input(question))
-            valid_input = True
+            break
         except:
             print("Error: Please enter a number. Try again!")
     return user_input
     
 def get_int_input(question):
     user_input = ""
-    valid_input = False
-    while not valid_input:
+    while True:
         try:
             user_input = int(input(question))
-            valid_input = True
+            break
         except:
             print("Error: Please enter a number. Try again!")
     return user_input
 
+def get_multi_float(prompts):
+    answers = [] 
+    
+    for prompt in prompts: 
+        answers.append(get_float_input(prompt))
+    
+    return answers
+
 def clear_console():
     import os
-    clear = lambda: os.system('cls')
+    clear = lambda: os.system('clear')
 
 if __name__ == '__main__':
     # Create calculator object
@@ -318,7 +329,7 @@ if __name__ == '__main__':
 # Simple GUI (Do last): https://realpython.com/pysimplegui-python/
 
 # Assumptions :
-# Buying paint by volume, not by bucket.
+# Buying paint by bucket, not raw volume 
 # User will choose their own paints, and not have to select the paint from a table, or some other data storage system.
 # Distance measurements in metres
 # Liquid measurements in litres
