@@ -1,6 +1,7 @@
 from enum import Enum
 import math 
 
+# Shapes
 class Shape(Enum):
     SQUARE = lambda b: pow(b, 2)
     RECTANGLE = lambda b, h: b * h
@@ -36,17 +37,23 @@ class Shape(Enum):
             case _:
                 return None
 
+class Paint(Enum):
+    # name = [hexcode, price per litre, litres per bucket]
+    RED = ['#FF0000', 1.00, 1.25]
+    BLUE = ['#00FF00', 1.25, 1.25]
+    GREEN = ['#FF0000', 2.75, 0.75]
+    
 ### A wall
 class Wall():
     def __init__(self, shape, surface_area, paint):
         self.paint = paint
         self.shape = shape
         self.surface_area = surface_area
-        self.paint_required = self.calculate_required_volume()
+        self.paint_required = self._calculate_required_volume()
         # self.coats = coats
         # self.protrustions = []
     
-    def calculate_required_volume(self):
+    def _calculate_required_volume(self):
         return self.surface_area / self.paint.coverage_per_unit
 
 ### A paint bucket
@@ -56,25 +63,24 @@ class Paint():
         self.coverage_per_unit = rate_per_unit
         # self.volume_per_bucket = volume_per_bucket
         # self.cost = cost
-
 class Calculator():
     def __init__(self):
-        paint_details = self.get_paint_details()
+        paint_details = self._get_paint_details()
         temp_paint = Paint(paint_details[0], paint_details[1])
 
-        wall_details = self.get_wall_details()
+        wall_details = self._get_wall_details()
         temp_wall = Wall(wall_details[0], wall_details[1], temp_paint)
         
         self.Walls = [temp_wall]
 
-    def get_wall_details(self):
-        wall_shape = self.get_wall_shape()
-        wall_surface_area = self.calc_wall_area(wall_shape)
+    def _get_wall_details(self):
+        wall_shape = self._get_wall_shape()
+        wall_surface_area = self._calc_wall_area(wall_shape)
         
         print("The surface area of this wall is: %.2f metres squared" % wall_surface_area) if wall_surface_area is not None else print("Surface area has not been calculated correctly!")
         return (wall_shape, wall_surface_area)
 
-    def get_float_input(self, question):
+    def _get_float_input(self, question):
         user_input = ""
         valid_input = False
 
@@ -87,7 +93,7 @@ class Calculator():
 
         return user_input
 
-    def get_wall_shape(self):
+    def _get_wall_shape(self):
         valid_input = False
         
         while not valid_input:
@@ -103,50 +109,45 @@ class Calculator():
         
         return wall_shape
     
-    def calc_wall_area(self, wall_shape):
+    def _calc_wall_area(self, wall_shape):
         wall_surface_area = None
         
         if wall_shape is Shape.SQUARE:
-            base_metres = self.get_float_input("Please enter the length of one side of your wall in metres: ")
+            base_metres = self._get_float_input("Please enter the length of one side of your wall in metres: ")
             wall_surface_area = wall_shape(base_metres)
         elif wall_shape is Shape.RECTANGLE or wall_shape is Shape.PARALLELOGRAM or wall_shape is Shape.TRIANGLE:
-            base_metres = self.get_float_input("Please enter the length of the base of your wall in metres: ")
-            height_metres = self.get_float_input("Please enter the the height of your wall in metres: ")
+            base_metres = self._get_float_input("Please enter the length of the base of your wall in metres: ")
+            height_metres = self._get_float_input("Please enter the the height of your wall in metres: ")
             wall_surface_area = wall_shape(base_metres, height_metres)
         elif wall_shape is Shape.TRAPEZOID:
-            base_metres = self.get_float_input("Please enter the length of the base of your wall in metres: ")
-            top_metres = self.get_float_input("Please enter the length of the top of your wall in metres: ")
-            height_metres = self.get_float_input("Please enter the the height of your wall in metres: ")
+            base_metres = self._get_float_input("Please enter the length of the base of your wall in metres: ")
+            top_metres = self._get_float_input("Please enter the length of the top of your wall in metres: ")
+            height_metres = self._get_float_input("Please enter the the height of your wall in metres: ")
             wall_surface_area = wall_shape(base_metres, height_metres, top_metres)
         elif wall_shape is Shape.ELLIPSE:
-            vertical_metres = self.get_float_input("Please enter the vertical radius of your wall in metres: ")
-            horizontal_metres = self.get_float_input("Please enter the horizontal radius of your wall in metres: ")
+            vertical_metres = self._get_float_input("Please enter the vertical radius of your wall in metres: ")
+            horizontal_metres = self._get_float_input("Please enter the horizontal radius of your wall in metres: ")
             wall_surface_area = wall_shape(horizontal_metres, vertical_metres)
         elif wall_shape is Shape.CIRCLE or wall_shape is Shape.SEMICIRCLE:
-            radius_metres = self.get_float_input("Please enter the radius of your wall in metres: ")
+            radius_metres = self._get_float_input("Please enter the radius of your wall in metres: ")
             wall_surface_area = wall_shape(radius_metres)
             
         return wall_surface_area
 
-    def get_paint_details(self):
-        paint_name = input("What is the name/colour is the paint?: ")
-
+    def _get_paint_details(self):
+        paint_name = input("What is the name/colour is the paint?: ")   
         valid_input = False
         while not valid_input:
-            confirmation = input("Are you sure you would like to identify this paint as: %s? (Y/N): "% paint_name).lower()
-
+            confirmation = input("Are you sure you would like to identify this paint as: %s? (Y/N): "% paint_name).lower()  
             if confirmation == 'y' or confirmation == 'yes':
                 valid_input = True
                 break;
             elif confirmation == 'n' or confirmation == 'no':
                 paint_name = input("Please enter a new identifier: ")
             else:
-                print("Error: You have not provided a valid answer!")
-
-        paint_coverage = self.get_float_input("Please enter the many square meters your paint can cover per litre of paint: ")
-
+                print("Error: You have not provided a valid answer!")   
+        paint_coverage = self._get_float_input("Please enter the many square meters your paint can cover per litre of paint: ")  
         return (paint_name, paint_coverage)
-
 
 if __name__ == '__main__':
     # Create calculator object
