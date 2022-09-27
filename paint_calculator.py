@@ -40,8 +40,20 @@ class Shape(Enum):
 class Paint(Enum):
     # name = [hexcode, price per litre, litres per bucket]
     RED = ['#FF0000', 1.00, 1.25]
-    BLUE = ['#00FF00', 1.25, 1.25]
-    GREEN = ['#FF0000', 2.75, 0.75]
+    BLUE = ['#0000FF', 1.25, 1.25]
+    GREEN = ['#00FF00', 2.75, 0.75]
+    
+    @classmethod
+    def to_paint(self, paint_name):
+        match paint_name:
+            case "red":
+                return Paint.RED
+            case "blue":
+                return Paint.BLUE
+            case "green":
+                return Paint.GREEN
+            case _:
+                return None
     
 ### A wall
 class Wall():
