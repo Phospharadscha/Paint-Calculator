@@ -1,3 +1,41 @@
+from enum import Enum
+import math 
+
+class Shape(Enum):
+    SQUARE = lambda b: pow(b, 2)
+    RECTANGLE = lambda b, h: b * h
+    PARALLELOGRAM = lambda b, h: b * h
+    TRAPEZOID = lambda b, h, a: ((a + b) // 2) * h
+    TRIANGLE = lambda b, h: 0.5 * (b * h)
+    ELLIPSE = lambda b, a: math.pi * (a*b)
+    CIRCLE = lambda r: math.pi * pow(r, 2)
+    SEMICIRCLE = lambda r: (math.pi * pow(r, 2)) // 2
+    
+    def __call__(self, args):
+        return self.value[0](args)
+    
+    @classmethod
+    def to_shape(self, shape_name):
+        match shape_name:
+            case "square":
+                return Shape.SQUARE
+            case "rectangle":
+                return Shape.RECTANGLE
+            case "parallelogram":
+                return Shape.PARALLELOGRAM
+            case "trapezoid":
+                return Shape.TRAPEZOID
+            case "triangle":
+                return Shape.TRIANGLE
+            case "ellipse":
+                return Shape.ELLIPSE
+            case "circle":
+                return Shape.CIRCLE
+            case "semicircle":
+                return Shape.SEMICIRCLE
+            case _:
+                return None
+
 ### A wall
 class Wall():
     def __init__(self, shape, surface_area, paint):
@@ -11,13 +49,13 @@ class Wall():
     def calculate_required_volume(self):
         return self.surface_area / self.paint.coverage_per_unit
 
-
 ### A paint bucket
 class Paint():
     def __init__(self, colour, rate_per_unit):
         self.colour = colour
         self.coverage_per_unit = rate_per_unit
         # self.volume_per_bucket = volume_per_bucket
+        # self.cost = cost
 
 class Calculator():
     def __init__(self):
@@ -25,48 +63,33 @@ class Calculator():
         temp_paint = Paint(paint_details[0], paint_details[1])
 
         wall_details = self.get_wall_details()
-        self.Walls = [Wall(wall_details[0], wall_details[1], temp_paint)]
+        temp_wall = Wall(wall_details[0], wall_details[1], temp_paint)
+        
+        self.Walls = [temp_wall]
 
     def get_wall_details(self):
-        from enum import Enum
-        import math
+        wall_shape = self.get_wall_shape()
+        wall_surface_area = self.calc_wall_area(wall_shape)
+        
+        print("The surface area of this wall is: %.2f metres squared" % wall_surface_area) if wall_surface_area is not None else print("Surface area has not been calculated correctly!")
+        return (wall_shape, wall_surface_area)
 
-        class Shape(Enum):
-            SQUARE = lambda b: pow(b, 2)
-            RECTANGLE = lambda b, h: b * h
-            PARALLELOGRAM = lambda b, h: b * h
-            TRAPEZOID = lambda b, h, a: ((a + b) // 2) * h
-            TRIANGLE = lambda b, h: 0.5 * (b * h)
-            ELLIPSE = lambda b, a: math.pi * (a*b)
-            CIRCLE = lambda r: math.pi * pow(r, 2)
-            SEMICIRCLE = lambda r: (math.pi * pow(r, 2)) // 2
-
-            def __call__(self, args):
-                return self.value[0](args)
-
-            @classmethod
-            def to_shape(self, shape_name):
-                match shape_name:
-                    case "square":
-                        return Shape.SQUARE
-                    case "rectangle":
-                        return Shape.RECTANGLE
-                    case "parallelogram":
-                        return Shape.PARALLELOGRAM
-                    case "trapezoid":
-                        return Shape.TRAPEZOID
-                    case "triangle":
-                        return Shape.TRIANGLE
-                    case "ellipse":
-                        return Shape.ELLIPSE
-                    case "circle":
-                        return Shape.CIRCLE
-                    case "semicircle":
-                        return Shape.SEMICIRCLE
-                    case _:
-                        return None
-
+    def get_float_input(self, question):
+        user_input = ""
         valid_input = False
+
+        while not valid_input:
+            try:
+                user_input = float(input(question))
+                valid_input = True
+            except:
+                print("Error: Please enter a number. Try again!")
+
+        return user_input
+
+    def get_wall_shape(self):
+        valid_input = False
+        
         while not valid_input:
             print("Square | Rectangle | Parallelogram | Trapezoid | Triangle | Ellipse | Circle | Semicircle")
             wall_shape = input("Of the shapes listed above, which best describes the shape of your wall?: ").lower()
@@ -77,8 +100,12 @@ class Calculator():
                 valid_input = True
             else:
                 print("Invalid Shape!")
-
+        
+        return wall_shape
+    
+    def calc_wall_area(self, wall_shape):
         wall_surface_area = None
+        
         if wall_shape is Shape.SQUARE:
             base_metres = self.get_float_input("Please enter the length of one side of your wall in metres: ")
             wall_surface_area = wall_shape(base_metres)
@@ -98,23 +125,8 @@ class Calculator():
         elif wall_shape is Shape.CIRCLE or wall_shape is Shape.SEMICIRCLE:
             radius_metres = self.get_float_input("Please enter the radius of your wall in metres: ")
             wall_surface_area = wall_shape(radius_metres)
-
-        print("The surface area of this wall is: %.2f metres squared" % wall_surface_area) if wall_surface_area is not None else print("Surface area has not been calculated correctly!")
-        return (wall_shape, wall_surface_area)
-
-    def get_float_input(self, question):
-        user_input = ""
-        valid_input = False
-
-        while not valid_input:
-            try:
-                user_input = float(input(question))
-                valid_input = True
-            except:
-                print("Error: Please enter a number. Try again!")
-
-        return user_input
-
+            
+        return wall_surface_area
 
     def get_paint_details(self):
         paint_name = input("What is the name/colour is the paint?: ")
