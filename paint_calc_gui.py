@@ -98,13 +98,65 @@ class Wall(Architecture):
         self.__coats = 1
         self.__obstacles = []
         
-    def define(self, shape, colour):
+    def define(self, shape, colour, num_of_obstacles):
         import PySimpleGUI as sg
         import sys
         
         num_of_values = 0 
         
         match shape:
+            case Shape.RECTANGLE | Shape.PARALLELOGRAM | Shape.TRIANGLE:
+                num_of_values = 2 
+                layout = [
+                    [sg.Text("Please enter the details of this wall:")], 
+                    [sg.Text("Enter the length of the base of the wall:")], 
+                    [sg.Multiline(size=(30,1), key='val1')], 
+                    [sg.Text("Enter the height of the wall:")], 
+                    [sg.Multiline(size=(30,1), key='val2')], 
+                    [sg.Text("Enter the number of coats side you plan to apply to the wall:")], 
+                    [sg.Multiline(size=(30,1), key='paint')], 
+                    [sg.Button("CONFIRM")],
+                    [sg.Button("CLOSE")]
+                ]
+            case Shape.TRAPEZOID:
+                num_of_values = 3 
+                layout = [
+                    [sg.Text("Please enter the details of this wall:")], 
+                    [sg.Text("Enter the length of the base of the wall:")], 
+                    [sg.Multiline(size=(30,1), key='val1')],
+                    [sg.Text("Enter the height of the wall:")], 
+                    [sg.Multiline(size=(30,1), key='val2')], 
+                    [sg.Text("Enter the length of the top of the wall:")], 
+                    [sg.Multiline(size=(30,1), key='val3')],  
+                    [sg.Text("Enter the number of coats side you plan to apply to the wall:")], 
+                    [sg.Multiline(size=(30,1), key='paint')], 
+                    [sg.Button("CONFIRM")],
+                    [sg.Button("CLOSE")]
+                ]
+            case Shape.ELLIPSE:
+                num_of_values = 2
+                layout = [
+                    [sg.Text("Please enter the details of this wall:")], 
+                    [sg.Text("Enter the vertical radius the wall:")], 
+                    [sg.Multiline(size=(30,1), key='val1')],
+                    [sg.Text("Enter the horizontal radius the wall:")], 
+                    [sg.Multiline(size=(30,1), key='val2')], 
+                    [sg.Text("Enter the number of coats side you plan to apply to the wall:")], 
+                    [sg.Multiline(size=(30,1), key='paint')], 
+                    [sg.Button("CONFIRM")],
+                    [sg.Button("CLOSE")]
+                ]
+            case Shape.CIRCLE | Shape.SEMICIRCLE:
+                num_of_values = 1
+                layout = [
+                    [sg.Text("Please enter the details of this wall:")], 
+                    [sg.Text("Enter the radius the wall:")], 
+                    [sg.Multiline(size=(30,1), key='val1')],
+                    [sg.Text("Enter the number of coats side you plan to apply to the wall:")], 
+                    [sg.Multiline(size=(30,1), key='paint')], 
+                    [sg.Button("CONFIRM")],
+                    [sg.Button("CLOSE")]
+                ]
             case _: # Default case is a square
                 num_of_values = 1 
                 layout = [
@@ -139,16 +191,16 @@ class Wall(Architecture):
                     dimensions.append(get_float_input(values['val2'], window, False))
                     dimensions.append(get_float_input(values['val3'], window, False))
                 break 
-              case None:
-                  sys.exit()
-              case "CLOSE":
+              case None | "CLOSE":
                   sys.exit()
               case _: 
                  pass
                  
         self.__paint = colour
         self.__coats = coats
-        self.__surface_area = self._calc_area(shape)
+        self.__surface_area = self._calc_area(shape, dimensions)
+        
+        print(self.__surface_area)
     
     def required_buckets(self):
         litres_required = (self.__surface_area * self.__coats) // self.__paint(2)
@@ -176,7 +228,6 @@ class Room():
         self.__index = 0
     
 
-
     def define(self, room_index):
         import PySimpleGUI as sg
         import sys
@@ -201,7 +252,7 @@ class Room():
             match event:
                 case "CONFIRM":
                     self.__name = values['name']
-                    self.__walls = [Wall] * get_int_input(values['walls'], window, False)
+                    self.__walls = [Wall()] * get_int_input(values['walls'], window, False)
                     break 
                 case None:
                     sys.exit()
@@ -215,7 +266,7 @@ class Room():
         import PySimpleGUI as sg
         import sys
         
-        shape_types = ["Square", "Rectangle", "Parallelogram", "Trapezoid", "Triangle", "Ellipse", "Cirlce", "Semicircle"]
+        shape_types = ["Square", "Rectangle", "Parallelogram", "Trapezoid", "Triangle", "Ellipse", "Circle", "Semicircle"]
         colours = ["Red", "Green", "Blue"]
         
         wall_index = 1
@@ -227,8 +278,8 @@ class Room():
                     [sg.Multiline(size=(30,1), key='obstacles')], 
                     [sg.Text("Please select the shape of the wall from the drop down menu: ")], 
                     [sg.OptionMenu(values=shape_types,size=(30,8), default_value='Square',key='shape')],
-                     [sg.Text("Please select the colour of the wall from the drop down menu: ")], 
-                    [sg.OptionMenu(values=shape_types,size=(30,8), default_value='Red',key='colour')],
+                    [sg.Text("Please select the colour of the wall from the drop down menu: ")], 
+                    [sg.OptionMenu(values=colours,size=(30,8), default_value='Red',key='colour')],
                     [sg.Button("CONFIRM")],
                     [sg.Button("CLOSE")]
                 ] 
@@ -242,6 +293,7 @@ class Room():
                         shape = Shape.to_shape(values['shape'].lower())
                         colour = Paint.to_paint(values['colour'].lower())
                         num_of_obstacles = get_int_input(values['obstacles'], window, True)
+                        wall.define(shape, colour, num_of_obstacles)  
                         break 
                     case None:
                         sys.exit()
@@ -250,7 +302,7 @@ class Room():
                     case _: 
                         pass
             
-            wall.define(shape, colour)  
+            
             window.close()
         
    
@@ -318,7 +370,7 @@ class Calculator():
 
 
 ##### Public Functions ##### 
-def get_float_input(usr_input, allow_zero):
+def get_float_input(usr_input, window, allow_zero):
     import PySimpleGUI as sg
     import sys
     
