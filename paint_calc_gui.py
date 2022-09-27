@@ -419,9 +419,7 @@ class Room():
                         num_of_obstacles = get_int_input(values['obstacles'], True)
                         wall.define(shape, colour, num_of_obstacles)  
                         break 
-                    case None:
-                        sys.exit()
-                    case "CLOSE":
+                    case None | "CLOSE":
                         sys.exit()
                     case _: 
                         pass
@@ -438,8 +436,6 @@ class Calculator():
   
         
     def main(self):
-        import PySimpleGUI as ui
-
         self.__rooms = self.__get_rooms()
         
         room_index = 1
@@ -448,19 +444,40 @@ class Calculator():
             room_index += 1
         
         ## Final Screen    
-        window = ui.Window("Paint Calculator")
+        self.__final_screen()
+
+    def __final_screen(self): 
+        import PySimpleGUI as sg
+
+        layout = [
+            [sg.Text("All values have been entered")], 
+            [sg.Button("Total Cost")],
+            [sg.Button("Total Paint")],
+            [sg.Button("Per Room")],
+            [sg.Button("CLOSE")]
+        ]
+        window = sg.Window("Paint Calculator", layout)
 
         while True:
-            event, value = window.read()
+            event, values = window.read()
             match event:
-                case ui.WIN_ClOSED:
+                case "Total Cost":
+                   pass
+                case "Total Cost":
+                   pass
+                case "Per":
+                   pass
+                case None | "CLOSE":
                     break
-                case _: # Square as default
+                case _: 
                     pass
+            
+            
+            window.close()
 
         window.close()
-
-    def calc_cost(self):
+        
+    def __calc_cost(self):
         cost = 0
         for room in self.__rooms:
             for wall in room.walls():
