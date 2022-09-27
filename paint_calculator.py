@@ -40,9 +40,12 @@ class Shape(Enum):
 # Paints
 class Paint(Enum):
     # name = [price per bucket, litres per bucket, coverage per litre]
-    RED = [1.00, 1.25, 0.75]
-    BLUE = [1.25, 1.25, 0.5]
-    GREEN = [ 2.75, 0.75, 1.34]
+    RED = (1.00, 1.25, 0.75)
+    BLUE = (1.25, 1.25, 0.5)
+    GREEN = (2.75, 0.75, 1.34)
+    
+    def __call__(self, args):
+        return self.value[args]
     
     @classmethod
     def to_paint(self, paint_name):
@@ -72,13 +75,10 @@ class Wall():
         self.surface_area = self._calc_area()
     
     def cost(self):
-        litres_required = (self.surface_area * self.coats) // self.paint[2]
-        buckets_required = round(litres_required // self.paint[1])
+        litres_required = (self.surface_area * self.coats) // self.paint(2)
+        buckets_required = round(litres_required // self.paint(1))
         
-        return buckets_required * self.paint[0]
-        
-        
-
+        return buckets_required * self.paint(0)
         
     def _get_paint(self):
         valid_input = False
@@ -163,11 +163,14 @@ class Room():
 class Calculator():
     def __init__(self):
         self.rooms = self._get_rooms() 
+           
+    def calc_cost(self):
+        cost = 0
+        for room in self.rooms:
+            for wall in room.walls:
+                cost += wall.cost()
         
-    # def calc_cost(self):
-    #     for room in self.rooms:
-    #         for wall in room:
-    #             cost += wall.colour.cost
+        return cost
 
     def _get_rooms(self):
         num_of_rooms = get_int_input("How many rooms are you wanting to paint? ")
@@ -227,10 +230,7 @@ def get_int_input(question):
 if __name__ == '__main__':
     # Create calculator object
     calculator = Calculator()
-    
-    # Iterate through all walls 
-    for wall in calculator.Walls:
-        print("For the specified wall, you would need %.2f litres of the %s paint" % (wall.paint_required, wall.paint.colour))
+    print("The total cost is: %.2f" % calculator.calc_cost())
     
 
 # GUI (Do last): https://realpython.com/pysimplegui-python/
