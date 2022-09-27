@@ -187,16 +187,16 @@ class Wall(Architecture):
           event, values = window.read()
           match event:
               case "CONFIRM":
-                coats = get_int_input(values['paint'], window, False)
+                coats = get_int_input(values['paint'], False)
                 if num_of_values == 1:
-                    dimensions.append(get_float_input(values['val1'], window, False))
+                    dimensions.append(get_float_input(values['val1'],  False))
                 elif num_of_values == 2:
-                    dimensions.append(get_float_input(values['val1'], window, False))
-                    dimensions.append(get_float_input(values['val2'], window, False))
+                    dimensions.append(get_float_input(values['val1'], False))
+                    dimensions.append(get_float_input(values['val2'], False))
                 else:
-                    dimensions.append(get_float_input(values['val1'], window, False))
-                    dimensions.append(get_float_input(values['val2'], window, False))
-                    dimensions.append(get_float_input(values['val3'], window, False))
+                    dimensions.append(get_float_input(values['val1'], False))
+                    dimensions.append(get_float_input(values['val2'], False))
+                    dimensions.append(get_float_input(values['val3'], False))
                 break 
               case None | "CLOSE":
                   sys.exit()
@@ -207,7 +207,7 @@ class Wall(Architecture):
         self.__coats = coats
         self.__surface_area = self._calc_area(shape, dimensions)
         
-        print(self.__surface_area)
+        window.close()
     
     def required_buckets(self):
         litres_required = (self.__surface_area * self.__coats) // self.__paint(2)
@@ -326,14 +326,14 @@ class Obstacle(Architecture):
           match event:
               case "CONFIRM":
                 if num_of_values == 1:
-                    dimensions.append(get_float_input(values['val1'], window, False))
+                    dimensions.append(get_float_input(values['val1'], False))
                 elif num_of_values == 2:
-                    dimensions.append(get_float_input(values['val1'], window, False))
-                    dimensions.append(get_float_input(values['val2'], window, False))
+                    dimensions.append(get_float_input(values['val1'], False))
+                    dimensions.append(get_float_input(values['val2'], False))
                 else:
-                    dimensions.append(get_float_input(values['val1'], window, False))
-                    dimensions.append(get_float_input(values['val2'], window, False))
-                    dimensions.append(get_float_input(values['val3'], window, False))
+                    dimensions.append(get_float_input(values['val1'], False))
+                    dimensions.append(get_float_input(values['val2'], False))
+                    dimensions.append(get_float_input(values['val3'], False))
                 break 
               case None | "CLOSE":
                   sys.exit()
@@ -376,17 +376,17 @@ class Room():
             match event:
                 case "CONFIRM":
                     self.__name = values['name']
-                    self.__walls = [Wall()] * get_int_input(values['walls'], window, False)
+                    self.__walls = [Wall()] * get_int_input(values['walls'], False)
                     break 
-                case None:
-                    sys.exit()
-                case "CLOSE":
+                case None | "CLOSE":
                     sys.exit()
                 case _: 
                     pass
+                
+        self.__populate()
         window.close()
         
-    def populate(self): 
+    def __populate(self): 
         import PySimpleGUI as sg
         import sys
         
@@ -416,7 +416,7 @@ class Room():
                     case "CONFIRM":
                         shape = Shape.to_shape(values['shape'].lower())
                         colour = Paint.to_paint(values['colour'].lower())
-                        num_of_obstacles = get_int_input(values['obstacles'], window, True)
+                        num_of_obstacles = get_int_input(values['obstacles'], True)
                         wall.define(shape, colour, num_of_obstacles)  
                         break 
                     case None:
@@ -445,16 +445,13 @@ class Calculator():
         room_index = 1
         for room in self.__rooms: 
             room.define(room_index)
-            room.populate()
             room_index += 1
         
-        ## Final Screen
-            
+        ## Final Screen    
         window = ui.Window("Paint Calculator")
 
         while True:
             event, value = window.read()
-
             match event:
                 case ui.WIN_ClOSED:
                     break
@@ -482,8 +479,9 @@ class Calculator():
             event, values = window.read()
             match event:
                 case "CONFIRM":
-                    num_of_rooms = get_int_input(values['textbox'], window, False)
+                    num_of_rooms = get_int_input(values['textbox'], False)
                     rooms = [Room()] * num_of_rooms
+                    window.close()
                     return rooms
                 case None:
                     sys.exit()
@@ -495,7 +493,7 @@ class Calculator():
 
 
 ##### Public Functions ##### 
-def get_float_input(usr_input, window, allow_zero):
+def get_float_input(usr_input, allow_zero):
     import PySimpleGUI as sg
     import sys
     
@@ -511,22 +509,22 @@ def get_float_input(usr_input, window, allow_zero):
 
         if not valid_input or (not allow_zero and user_input == 0) or user_input < 0:
             layout = [[sg.Text('Error: Please enter a positive, non-zero, whole number:')], [sg.Multiline(size=(30,5), key='textbox')], [sg.Button("CONFIRM")], [sg.Button("CLOSE")]]
-            window.close()
             window = sg.Window("Paint Calculator", layout) 
         elif valid_input:
+            window = sg.Window("Paint Calculator") 
             window.close()
             return user_input
 
-        window.refresh()
         while True:
           event, values = window.read()
           if event == "CONFIRM":
               usr_input = values['textbox']
+              window.close()
               break
           elif event == "CLOSE":
               sys.exit()
     
-def get_int_input(usr_input, window, allow_zero):
+def get_int_input(usr_input, allow_zero):
     import PySimpleGUI as sg
     import sys
     
@@ -542,9 +540,9 @@ def get_int_input(usr_input, window, allow_zero):
 
         if not valid_input or (not allow_zero and user_input == 0) or user_input < 0:
             layout = [[sg.Text('Error: Please enter a positive, non-zero, whole number:')], [sg.Multiline(size=(30,1), key='textbox')], [sg.Button("CONFIRM")], [sg.Button("CLOSE")]]
-            window.close()
-            window = sg.Window("Paint Calculator", layout) 
+            window = sg.Window("Paint Calculator", layout)  
         elif valid_input:
+            window = sg.Window("Paint Calculator") 
             window.close()
             return user_input
 
@@ -553,6 +551,7 @@ def get_int_input(usr_input, window, allow_zero):
           event, values = window.read()
           if event == "CONFIRM":
               usr_input = values['textbox']
+              window.close()
               break
           elif event == "CLOSE":
               sys.exit()
