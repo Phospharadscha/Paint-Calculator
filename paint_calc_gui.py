@@ -63,7 +63,6 @@ class Paint(Enum):
             case _:
                 return None
 
-
 ##### Classes ##### 
 # Architecture (Walls, doors, windows, etc)
 class Architecture():
@@ -412,7 +411,8 @@ class Room():
                     [sg.OptionMenu(values=colours,size=(30,8), default_value='Red',key='colour')],
                     [sg.Button("CONFIRM")],
                     [sg.Button("CLOSE")]
-                ] 
+                ]
+            wall_index += 1
 
             window = sg.Window("Paint Calculator", layout)
 
