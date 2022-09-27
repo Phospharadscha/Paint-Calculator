@@ -39,10 +39,10 @@ class Shape(Enum):
 
 # Paints
 class Paint(Enum):
-    # name = [hexcode, price per litre, litres per bucket, coverage per litre]
-    RED = ['#FF0000', 1.00, 1.25, 0.75]
-    BLUE = ['#0000FF', 1.25, 1.25, 0.5]
-    GREEN = ['#00FF00', 2.75, 0.75, 1.34]
+    # name = [price per bucket, litres per bucket, coverage per litre]
+    RED = [1.00, 1.25, 0.75]
+    BLUE = [1.25, 1.25, 0.5]
+    GREEN = [ 2.75, 0.75, 1.34]
     
     @classmethod
     def to_paint(self, paint_name):
@@ -70,6 +70,14 @@ class Wall():
         self.colour = self._get_paint()
         self.shape = self._get_shape()
         self.surface_area = self._calc_area()
+    
+    def cost(self):
+        litres_required = (self.surface_area * self.coats) // self.paint[2]
+        buckets_required = round(litres_required // self.paint[1])
+        
+        return buckets_required * self.paint[0]
+        
+        
 
         
     def _get_paint(self):
