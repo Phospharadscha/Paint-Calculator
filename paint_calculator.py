@@ -342,8 +342,7 @@ if __name__ == '__main__':
 # Implement a test
     # Pytest
 
-# TODO -  Would be Nice
-# Simple GUI (Do last): https://realpython.com/pysimplegui-python/
+
 
 # Assumptions :
 # Buying paint by bucket, not raw volume 

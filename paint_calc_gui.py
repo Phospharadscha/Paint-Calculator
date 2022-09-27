@@ -607,3 +607,19 @@ def clear_console():
 if __name__ == '__main__':
     calculator = Calculator()
     calculator.main()
+    
+# TODO - Important
+# Change box headers to suit context
+# Mention what measurement is being used
+# Implement a test
+    # Pytest
+
+
+
+# Assumptions :
+# Buying paint by bucket, not raw volume 
+# User will choose their own paints, and not have to select the paint from a table, or some other data storage system.
+# Distance measurements in metres
+# Liquid measurements in litres
+# This is a system that will be deployed by a company. They will specify what paints are available.
+    # User does not specify paints
