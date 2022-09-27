@@ -104,6 +104,13 @@ class Wall(Architecture):
         
         num_of_values = 0 
         
+        self.__obstacles = [Obstacle()] * num_of_obstacles
+        obstacle_index = 1
+        
+        for obstacle in self.__obstacles:
+            obstacle.define(obstacle_index, len(self.__obstacles))
+            obstacle_index += 1 
+        
         match shape:
             case Shape.RECTANGLE | Shape.PARALLELOGRAM | Shape.TRIANGLE:
                 num_of_values = 2 
@@ -216,9 +223,126 @@ class Wall(Architecture):
 
 # Windows, Doors, etc. 
 class Obstacle(Architecture): 
-    def define(self, index):
-        self.__index = index
-        self.__surface_area = self._calc_area()
+    
+    def define(self, index, total_num):
+        import PySimpleGUI as sg
+        import sys
+        
+        shape_types = ["Square", "Rectangle", "Parallelogram", "Trapezoid", "Triangle", "Ellipse", "Circle", "Semicircle"]
+        
+        layout = [
+                [sg.Text("Obstacle No.%d of %d" % (index, total_num))], 
+                [sg.Text("Please enter the details of this obstacle:")], 
+                [sg.Text("Please select the shape of the obstacle from the drop down menu: ")], 
+                [sg.OptionMenu(values=shape_types,size=(30,8), default_value='Square',key='shape')],
+                [sg.Button("CONFIRM")],
+                [sg.Button("CLOSE")]
+            ] 
+        
+        window = sg.Window("Paint Calculator", layout)
+
+        while True:
+            event, values = window.read()
+            match event:
+                case "CONFIRM":
+                    shape = Shape.to_shape(values['shape'].lower())
+                    break 
+                case None:
+                    sys.exit()
+                case "CLOSE":
+                    sys.exit()
+                case _: 
+                    pass
+            
+        self.__area(shape)   
+        window.close()
+        
+    def __area(self, shape):
+        import PySimpleGUI as sg
+        import sys
+         
+        match shape:
+            case Shape.RECTANGLE | Shape.PARALLELOGRAM | Shape.TRIANGLE:
+                num_of_values = 2 
+                layout = [
+                    [sg.Text("Please enter the details of this obstacle:")], 
+                    [sg.Text("Enter the length of the base of the obstacle:")], 
+                    [sg.Multiline(size=(30,1), key='val1')], 
+                    [sg.Text("Enter the height of the obstacle:")], 
+                    [sg.Multiline(size=(30,1), key='val2')], 
+                    [sg.Button("CONFIRM")],
+                    [sg.Button("CLOSE")]
+                ]
+            case Shape.TRAPEZOID:
+                num_of_values = 3 
+                layout = [
+                    [sg.Text("Please enter the details of this obstacle:")], 
+                    [sg.Text("Enter the length of the base of the obstacle:")], 
+                    [sg.Multiline(size=(30,1), key='val1')],
+                    [sg.Text("Enter the height of the obstacle:")], 
+                    [sg.Multiline(size=(30,1), key='val2')], 
+                    [sg.Text("Enter the length of the top of the obstacle:")], 
+                    [sg.Multiline(size=(30,1), key='val3')],  
+                    [sg.Button("CONFIRM")],
+                    [sg.Button("CLOSE")]
+                ]
+            case Shape.ELLIPSE:
+                num_of_values = 2
+                layout = [
+                    [sg.Text("Please enter the details of this obstacle:")], 
+                    [sg.Text("Enter the vertical radius the obstacle:")], 
+                    [sg.Multiline(size=(30,1), key='val1')],
+                    [sg.Text("Enter the horizontal radius the obstacle:")], 
+                    [sg.Multiline(size=(30,1), key='val2')], 
+                    [sg.Button("CONFIRM")],
+                    [sg.Button("CLOSE")]
+                ]
+            case Shape.CIRCLE | Shape.SEMICIRCLE:
+                num_of_values = 1
+                layout = [
+                    [sg.Text("Please enter the details of this obstacle:")], 
+                    [sg.Text("Enter the radius the obstacle:")], 
+                    [sg.Multiline(size=(30,1), key='val1')],
+                    [sg.Button("CONFIRM")],
+                    [sg.Button("CLOSE")]
+                ]
+            case _: # Default case is a square
+                num_of_values = 1 
+                layout = [
+                    [sg.Text("Please enter the details of this obstacle:")], 
+                    [sg.Text("Enter the length of one side of the obstacle:")], 
+                    [sg.Multiline(size=(30,1), key='val1')], 
+                    [sg.Button("CONFIRM")],
+                    [sg.Button("CLOSE")]
+                ]     
+        
+        window = sg.Window("Paint Calculator", layout)
+        
+        dimensions = []
+        coats = 0
+                
+        while True:
+          event, values = window.read()
+          match event:
+              case "CONFIRM":
+                if num_of_values == 1:
+                    dimensions.append(get_float_input(values['val1'], window, False))
+                elif num_of_values == 2:
+                    dimensions.append(get_float_input(values['val1'], window, False))
+                    dimensions.append(get_float_input(values['val2'], window, False))
+                else:
+                    dimensions.append(get_float_input(values['val1'], window, False))
+                    dimensions.append(get_float_input(values['val2'], window, False))
+                    dimensions.append(get_float_input(values['val3'], window, False))
+                break 
+              case None | "CLOSE":
+                  sys.exit()
+              case _: 
+                 pass
+                 
+        self.__surface_area = self._calc_area(shape, dimensions)
+        window.close()
+
 
 # Rooms
 class Room():
@@ -324,7 +448,8 @@ class Calculator():
             room.populate()
             room_index += 1
         
-        
+        ## Final Screen
+            
         window = ui.Window("Paint Calculator")
 
         while True:
