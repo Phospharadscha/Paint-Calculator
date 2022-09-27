@@ -58,7 +58,7 @@ class Paint(Enum):
     
 ### A wall
 class Wall():
-    def __init__(self, shape, surface_area, paint):
+    def __init__(self):
         self.paint = Paint.RED
         self.shape = Shape.SQUARE
         self.surface_area = 0.0
@@ -67,11 +67,26 @@ class Wall():
         self.protrustions = []
         
     def define(self):
+        self.colour = self._get_paint()
         self.shape = self._get_shape()
-        wall_surface_area = self._calc_area(wall_shape)
+        self.surface_area = self._calc_area()
+
         
-        print("The surface area of this wall is: %.2f metres squared" % wall_surface_area) if wall_surface_area is not None else print("Surface area has not been calculated correctly!")
-        return (wall_shape, wall_surface_area)
+    def _get_paint(self):
+        valid_input = False
+        
+        while not valid_input:
+            print("Red | Green | Blue")
+            colour = input("Of the colours listed above, which do you want to use on your wall? ").lower()
+
+            paint_colour = Paint.to_paint(colour)
+            if paint_colour is not None:
+                colour = paint_colour
+                valid_input = True
+            else:
+                print("Invalid Shape!")
+        
+        return colour
 
     def _get_shape(self):
         valid_input = False
@@ -89,28 +104,28 @@ class Wall():
         
         return wall_shape
     
-    def _calc_area(self, wall_shape):
+    def _calc_area(self):
         wall_surface_area = None
         
-        if wall_shape is Shape.SQUARE:
+        if self.shape is Shape.SQUARE:
             base_metres = get_float_input("Please enter the length of one side of your wall in metres: ")
-            wall_surface_area = wall_shape(base_metres)
-        elif wall_shape is Shape.RECTANGLE or wall_shape is Shape.PARALLELOGRAM or wall_shape is Shape.TRIANGLE:
+            wall_surface_area = self.shape(base_metres)
+        elif self.shape is Shape.RECTANGLE or self.shape is Shape.PARALLELOGRAM or self.shape is Shape.TRIANGLE:
             base_metres = get_float_input("Please enter the length of the base of your wall in metres: ")
             height_metres = get_float_input("Please enter the the height of your wall in metres: ")
-            wall_surface_area = wall_shape(base_metres, height_metres)
-        elif wall_shape is Shape.TRAPEZOID:
+            wall_surface_area = self.shape(base_metres, height_metres)
+        elif self.shape is Shape.TRAPEZOID:
             base_metres = get_float_input("Please enter the length of the base of your wall in metres: ")
             top_metres = get_float_input("Please enter the length of the top of your wall in metres: ")
             height_metres = get_float_input("Please enter the the height of your wall in metres: ")
-            wall_surface_area = wall_shape(base_metres, height_metres, top_metres)
-        elif wall_shape is Shape.ELLIPSE:
+            wall_surface_area = self.shape(base_metres, height_metres, top_metres)
+        elif self.shape is Shape.ELLIPSE:
             vertical_metres = get_float_input("Please enter the vertical radius of your wall in metres: ")
             horizontal_metres = get_float_input("Please enter the horizontal radius of your wall in metres: ")
-            wall_surface_area = wall_shape(horizontal_metres, vertical_metres)
-        elif wall_shape is Shape.CIRCLE or wall_shape is Shape.SEMICIRCLE:
+            wall_surface_area = self.shape(horizontal_metres, vertical_metres)
+        elif self.shape is Shape.CIRCLE or self.shape is Shape.SEMICIRCLE:
             radius_metres = get_float_input("Please enter the radius of your wall in metres: ")
-            wall_surface_area = wall_shape(radius_metres)
+            wall_surface_area = self.shape(radius_metres)
             
         return wall_surface_area
     
