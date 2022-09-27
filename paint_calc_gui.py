@@ -1,6 +1,7 @@
 from abc import abstractmethod
 from enum import Enum
-import math 
+import math
+from tkinter import Button 
 
 ##### Enums #####
 # Shapes
@@ -213,16 +214,39 @@ class Room():
         self.__name = "default room"
         self.__index = 0
     
+    def set_name(self, room_index): 
+        import PySimpleGUI as sg
+        import sys
+        
+        self.__index = room_index
+        
+        layout = [
+                [sg.Text("Room No.%d" % self.__index)], 
+                [sg.Text("Please enter a name for this room: ")], 
+                [sg.Multiline(size=(30,5), key='textbox')], 
+                [sg.Button("CONFIRM")],
+                [sg.Button("CLOSE")]
+            ] 
+                
+        window = sg.Window("Paint Calculator", layout)
+        
+        while True:
+            event, values = window.read()
+            match event:
+                case "CONFIRM":
+                    self.__name = values['textbox']
+                    break 
+                case None:
+                    sys.exit()
+                case "CLOSE":
+                    sys.exit()
+                case _: 
+                    pass
+        window.close()
+         
     def define(self, room_index):
         self.__index = room_index
         
-        print("Room No.%d" % self.__index)
-        while True: 
-            self.__name = input("Please enter a name for this room: ")
-            temp_input = input("Are you sure you want this room to be called: '%s' (y/n): " % self.__name).lower()
-            if  temp_input == 'y' or temp_input == 'yes':
-                break
-            
         clear_console()
         
         print("Current Room: %s" % self.__name)  
@@ -247,8 +271,56 @@ class Room():
 
 # The Calculator
 class Calculator():
-    def __init__(self):
-        self.__rooms = self.__get_rooms() 
+    def __init__(self):       
+        self.__rooms = []
+    
+  
+        
+    def main(self):
+        import PySimpleGUI as ui
+
+        self.__rooms = self.__get_rooms()
+        
+        room_index = 1
+        for room in self.__rooms: 
+            room.set_name(room_index)
+            room_index += 1
+        
+        
+        shape_types = [['Shape', ["Square", "Rectangle", "Parallelogram", "Trapezoid", "Triangle", "Ellipse", "Cirlce", "Semicircle"]]]
+
+        # Define UI elements
+        layout = [[ui.Menu(shape_types, text_color="black", font="SYSTEM_DEFAULT", pad=(10,10))]]
+        window = ui.Window("Paint Calculator", layout)
+
+        while True:
+            event, value = window.read()
+
+            match event:
+                case ui.WIN_ClOSED:
+                    break
+                case 'Rectangle' | 'Parallelogram' | 'Triangle':
+                    print('Temp')
+                case 'Trapezoid':
+                    print('Temp')
+                case 'Ellipse':
+                    print('Temp')
+                case 'Cirlce' | 'Semicircle':
+                    print('Temp')
+                case _: # Square as default
+                    layout = [
+                        [ui.Menu(shape_types, text_color="black", font="SYSTEM_DEFAULT", pad=(10,10))] ,
+                        [sg.Text('Please enter the length of one side of your wall in metres:')], 
+                        [sg.Multiline(size=(30,5), key='length')], 
+                        [sg.Button("CONFIRM")], 
+                        [sg.Button("CLOSE")]
+                    ]
+
+
+
+
+
+        window.close()
 
     def calc_cost(self):
         cost = 0
@@ -258,99 +330,98 @@ class Calculator():
         
         return cost
 
-    def __get_rooms(self):  
-        num_of_rooms = get_int_input("How many rooms are you wanting to paint? ")
+    def __get_rooms(self): 
+        import PySimpleGUI as sg
+        import sys
+        
+        layout = [[sg.Text('Please enter the number of rooms you wish to paint in the box below:')], [sg.Multiline(size=(30,5), key='textbox')], [sg.Button("CONFIRM")], [sg.Button("CLOSE")]] 
+        window = sg.Window("Paint Calculator", layout)
         
         while True:
-            try:
-                rooms = [Room()] * num_of_rooms
-                break
-            except: 
-                num_of_rooms = get_int_input("Error! number of rooms could not be generated. Program will now close!")
-                ## EDIT LATER
+            event, values = window.read()
+            match event:
+                case "CONFIRM":
+                    num_of_rooms = get_int_input(values['textbox'], window)
+                    rooms = [Room()] * num_of_rooms
+                    return rooms
+                case None:
+                    sys.exit()
+                case "CLOSE":
+                    sys.exit()
+                case _: 
+                    pass
         
-        clear_console()
-        
-        index = 1
-        for room in rooms:
-            room.define(index)
-            index += 1
-            clear_console()
-            
-        return rooms
 
 
 ##### Public Functions ##### 
-def get_float_input(question):
-    user_input = ""
-    while True:
-        try:
-            user_input = float(input(question))
-            if user_input >= 0:
-                break
-            else: 
-                print("Error: Please enter a positive number.")   
-            break
-        except ValueError:
-            print("Error: Please enter a number.")
-    return user_input
+def get_float_input(usr_input):
+    import PySimpleGUI as sg
+    import sys
     
-def get_int_input(question):
     user_input = ""
+    valid_input = False
+    
     while True:
         try:
-            user_input = int(input(question))
-            if user_input >= 0:
-                break
-            else: 
-                print("Error: Please enter a positive whole number.")    
+            user_input = float(usr_input)
+            valid_input = True
         except ValueError:
-            print("Error: Please enter a whole number.")
-    return user_input
+            valid_input = False
 
-def get_multi_float(prompts):
-    answers = [] 
+        if not valid_input or user_input <= 0:
+            layout = [[sg.Text('Error: Please enter a positive, non-zero, whole number:')], [sg.Multiline(size=(30,5), key='textbox')], [sg.Button("CONFIRM")], [sg.Button("CLOSE")]]
+            window.close()
+            window = sg.Window("Paint Calculator", layout) 
+        elif valid_input:
+            window.close()
+            return user_input
+
+        window.refresh()
+        while True:
+          event, values = window.read()
+          if event == "CONFIRM":
+              usr_input = values['textbox']
+              break
+          elif event == "CLOSE":
+              sys.exit()
     
-    for prompt in prompts: 
-        answers.append(get_float_input(prompt))
+def get_int_input(usr_input, window):
+    import PySimpleGUI as sg
+    import sys
     
-    return answers
+    user_input = ""
+    valid_input = False
+    
+    while True:
+        try:
+            user_input = int(usr_input)
+            valid_input = True
+        except ValueError:
+            valid_input = False
+
+        if not valid_input or user_input <= 0:
+            layout = [[sg.Text('Error: Please enter a positive, non-zero, whole number:')], [sg.Multiline(size=(30,5), key='textbox')], [sg.Button("CONFIRM")], [sg.Button("CLOSE")]]
+            window.close()
+            window = sg.Window("Paint Calculator", layout) 
+        elif valid_input:
+            window.close()
+            return user_input
+
+        window.refresh()
+        while True:
+          event, values = window.read()
+          if event == "CONFIRM":
+              usr_input = values['textbox']
+              break
+          elif event == "CLOSE":
+              sys.exit()
+
 
 def clear_console():
     import os
     clear = lambda: os.system('clear')
 
 if __name__ == '__main__':
-    # Create calculator object
     calculator = Calculator()
-    
-    while True:
-        # Temporary system
-        # Break down of paints
-            # Cost per paint
-            # Total buckets per paint required
-        # Total Cost
-        input("The total cost is: %.2f" % calculator.calc_cost()).lower
-        if input == 'exit':
-            break
-    
+    calculator.main()
 
-# TODO - Important
-# Format Text Output better
-# Area calculation thing 
-# Verify all user inputs
-# Implement a test
-    # Pytest
-
-# TODO -  Would be Nice
-# Simple GUI (Do last): https://realpython.com/pysimplegui-python/
-
-# Assumptions :
-# Buying paint by bucket, not raw volume 
-# User will choose their own paints, and not have to select the paint from a table, or some other data storage system.
-# Distance measurements in metres
-# Liquid measurements in litres
-# This is a system that will be deployed by a company. They will specify what paints are available.
-    # User does not specify paints
-
-# Should be done by the end of tomorrow. Or, at least presentable. 
