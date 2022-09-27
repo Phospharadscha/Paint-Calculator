@@ -205,8 +205,9 @@ class Wall(Architecture):
                  
         self.__paint = colour
         self.__coats = coats
-        self.__surface_area = self._calc_area(shape, dimensions)
         
+        window.Disable()
+        self.__surface_area = self._calc_area(shape, dimensions)
         window.close()
     
     def required_buckets(self):
@@ -253,7 +254,8 @@ class Obstacle(Architecture):
                     sys.exit()
                 case _: 
                     pass
-            
+        
+        window.Disable()
         self.__area(shape)   
         window.close()
         
@@ -339,7 +341,8 @@ class Obstacle(Architecture):
                   sys.exit()
               case _: 
                  pass
-                 
+             
+        window.Disable()        
         self.__surface_area = self._calc_area(shape, dimensions)
         window.close()
 
@@ -351,7 +354,9 @@ class Room():
         self.__name = "default room"
         self.__index = 0
     
-
+    def get_walls(self):
+        return self.__walls
+        
     def define(self, room_index):
         import PySimpleGUI as sg
         import sys
@@ -376,13 +381,14 @@ class Room():
             match event:
                 case "CONFIRM":
                     self.__name = values['name']
+                    window.Disable()
                     self.__walls = [Wall()] * get_int_input(values['walls'], False)
                     break 
                 case None | "CLOSE":
                     sys.exit()
                 case _: 
                     pass
-                
+            
         self.__populate()
         window.close()
         
@@ -416,15 +422,14 @@ class Room():
                     case "CONFIRM":
                         shape = Shape.to_shape(values['shape'].lower())
                         colour = Paint.to_paint(values['colour'].lower())
+                        window.Disable()
                         num_of_obstacles = get_int_input(values['obstacles'], True)
                         wall.define(shape, colour, num_of_obstacles)  
                         break 
                     case None | "CLOSE":
                         sys.exit()
                     case _: 
-                        pass
-            
-            
+                        pass   
             window.close()
         
    
@@ -448,6 +453,7 @@ class Calculator():
 
     def __final_screen(self): 
         import PySimpleGUI as sg
+        import sys
 
         layout = [
             [sg.Text("All values have been entered")], 
@@ -462,18 +468,39 @@ class Calculator():
             event, values = window.read()
             match event:
                 case "Total Cost":
-                   pass
-                case "Total Cost":
-                   pass
-                case "Per":
-                   pass
+                    window.Disable()
+                    total_cost = 0
+                    for room in self.__rooms:
+                        for wall in room.get_walls():
+                            total_cost += wall.cost()
+                    temp_layout = [
+                        [sg.Text("Total Cost: %.2f" % total_cost)], 
+                        [sg.Button("OK")]
+                    ]
+
+                    temp_window = sg.Window("Total Cost", temp_layout)
+
+                    while True:
+                        event, values = temp_window.read()
+                        match event:
+                            case None | "OK":
+                                temp_window.close()
+                                break
+                            case _: 
+                                temp_window.close()
+                                break
+                            
+                    window.Enable()
+                case "Total Paint":
+                    pass
+                case "Per Room:": 
+                    pass
                 case None | "CLOSE":
+                    sys.exit()
                     break
                 case _: 
-                    pass
-            
-            
-            window.close()
+                    sys.exit()
+                    break
 
         window.close()
         
@@ -496,13 +523,12 @@ class Calculator():
             event, values = window.read()
             match event:
                 case "CONFIRM":
+                    window.Disable()
                     num_of_rooms = get_int_input(values['textbox'], False)
                     rooms = [Room()] * num_of_rooms
                     window.close()
                     return rooms
-                case None:
-                    sys.exit()
-                case "CLOSE":
+                case None | "CLOSE":
                     sys.exit()
                 case _: 
                     pass
@@ -581,4 +607,3 @@ def clear_console():
 if __name__ == '__main__':
     calculator = Calculator()
     calculator.main()
-
