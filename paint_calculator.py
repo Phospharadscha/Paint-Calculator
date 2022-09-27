@@ -63,6 +63,7 @@ class Paint(Enum):
 class Architecture():
     def __init__(self):
         self.__surface_area = 0  
+        self.__index = 0
 
     def area(self):
         return self.__surface_area
@@ -113,7 +114,6 @@ class Architecture():
             
         return wall_surface_area
 
-    
 # A wall
 class Wall(Architecture):
     def __init__(self):
@@ -121,15 +121,26 @@ class Wall(Architecture):
         self.__surface_area = 0.0
         self.__coats = 1
         self.__obstacles = []
+        self.__index = 0
         
-    def define(self):
+    def define(self, index):
+        self.__index = index
         self.__paint = self.__get_paint()
-        self.__get_obstacles()
+        self.__coats = self.__get_coats()
+        clear_console()
+        
+        self.__get_obstacles = self.__get_obstacles()
+        clear_console()
+
+        print("Wall No.%d" % self.__index)
         self.__surface_area = self._calc_area()
+        clear_console()
         
         if len(self.__obstacles) != 0:
             self.__area_without_obstacles()
-        
+    
+    def __get_coats(self):
+        return get_int_input("How many coats of this paint do you plan to apply? ")
     
     def required_buckets(self):
         litres_required = (self.__surface_area * self.__coats) // self.__paint(2)
@@ -140,25 +151,30 @@ class Wall(Architecture):
     
     def __get_obstacles(self):
         num_of_obstacles = get_int_input("Please enter the number of obstacles (doors/windows) on this wall: ")
-        
         valid_input = False
         while not valid_input:
             try:
-                self.__obstacles = [Obstacle()] * num_of_obstacles
+                obstacles = [Obstacle()] * num_of_obstacles
                 valid_input = True 
             except: 
                 num_of_obstacles = get_int_input("Error! Please enter the number of obstacles (doors/windows) on this wall as a whole number: ")
         
-        for obstacle in self.__obstacles:
-            obstacle.define()
+        index = 0
+        for obstacle in obstacles:
+            print("Obstacle No.%d" % self.__index)
+            obstacle.define(index)
+            index += 1
+            clear_console()
+        
+        return obstacles
     
     def __area_without_obstacles(self):
         for obstacle in self.__obstacles:
             self.__surface_area -= obstacle.area()
         
-
-    def __get_paint(self):
+    def __get_paint(self): 
         valid_input = False
+        print("Wall No.%d" % self.__index)
         
         while not valid_input:
             print("Red | Green | Blue")
@@ -169,20 +185,35 @@ class Wall(Architecture):
                 colour = paint_colour
                 valid_input = True
             else:
-                print("Invalid Shape!")
+                print("Invalid colour!")
         
         return colour
 # Windows, Doors, etc. 
 class Obstacle(Architecture): 
-    def define(self):
+    def define(self, index):
+        self.__index = index
         self.__surface_area = self._calc_area()
 
 # Rooms
 class Room():
     def __init__(self):
         self.__walls = []
+        self.__name = "default room"
+        self.__index = 0
     
-    def define(self):
+    def define(self, room_index):
+        self.__index = room_index
+        
+        print("Room No.%d" % self.__index)
+        while True: 
+            self.__name = input("Please enter a name for this room: ")
+            temp_input = input("Are you sure you want this room to be called: '%s' (y/n): " % self.__name).lower()
+            if  temp_input == 'y' or temp_input == 'yes':
+                break
+            
+        clear_console()
+        
+        print("Current Room: %s" % self.__name)  
         num_of_walls = get_int_input("Please enter the number of walls for this room: ")
         
         valid_input = False
@@ -193,8 +224,12 @@ class Room():
             except: 
                 num_of_walls = get_int_input("Error! Please enter the number of walls for this room as a whole number: ")
         
+        index = 1
         for wall in self.__walls:
-            wall.define()
+            print("Current Room: %s" % self.__name) 
+            wall.define(index)
+            index += 1
+            clear_console()
             
     def walls(self):
         return self.__walls
@@ -212,7 +247,7 @@ class Calculator():
         
         return cost
 
-    def __get_rooms(self):
+    def __get_rooms(self):  
         num_of_rooms = get_int_input("How many rooms are you wanting to paint? ")
         
         valid_input = False
@@ -223,8 +258,13 @@ class Calculator():
             except: 
                 num_of_rooms = get_int_input("Error! Please enter the number of rooms you are wanting to paint as a whole number: ")
         
+        clear_console()
+        
+        index = 1
         for room in rooms:
-            room.define()
+            room.define(index)
+            index += 1
+            clear_console()
             
         return rooms
 
@@ -250,6 +290,10 @@ def get_int_input(question):
             print("Error: Please enter a number. Try again!")
     return user_input
 
+def clear_console():
+    import os
+    clear = lambda: os.system('cls')
+
 if __name__ == '__main__':
     # Create calculator object
     calculator = Calculator()
@@ -266,11 +310,8 @@ if __name__ == '__main__':
     
 
 # TODO - Important
-# Implement doors/windows
-# Implement multiple paints
-# Implement multiple walls
-# Once paints are tied to individual walls, ask how many coats need to be applied. 
 # Name Rooms
+# Format Text Output better
 
 # TODO -  Would be Nice
 # Saving to a file 
