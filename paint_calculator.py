@@ -12,9 +12,6 @@ class Paint():
         self.colour = colour
         self.coverage_per_unit = rate_per_unit
 
-    def return_colour(self):
-        return self.colour
-
 class Calculator():
     def __init__(self):
         paint_details = self.get_paint_details()
@@ -45,7 +42,7 @@ class Calculator():
                 return self.value[0](args)
 
             @classmethod
-            def get_shape(self, shape_name):
+            def to_shape(self, shape_name):
                 match shape_name:
                     case "square":
                         return Shape.SQUARE
@@ -71,7 +68,7 @@ class Calculator():
             print("Square | Rectangle | Parallelogram | Trapezoid | Triangle | Ellipse | Circle | Semicircle")
             wall_shape = input("Of the shapes listed above, which best describes the shape of your wall?: ").lower()
 
-            shape_type = Shape.get_shape(wall_shape)
+            shape_type = Shape.to_shape(wall_shape)
             if shape_type is not None:
                 wall_shape = shape_type
                 valid_input = True
@@ -137,6 +134,7 @@ class Calculator():
 
 
 if __name__ == '__main__':
+    # Create calculator object
     calculator = Calculator()
     print("For the specified wall, you would need %.2f litres of the %s paint" % (calculator.calculate_required_volume(), calculator.wall.paint.colour))
 
@@ -150,6 +148,7 @@ if __name__ == '__main__':
 # Implement multiple walls
 # Simple GUI
 # Maybe store the walls as rooms. Do this after I have multiple walls implemented 
+# Once paints are tied to individual walls, ask how many coats need to be applied. 
 
 
 # Assumptions :
