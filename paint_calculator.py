@@ -39,10 +39,10 @@ class Shape(Enum):
 
 # Paints
 class Paint(Enum):
-    # name = [hexcode, price per litre, litres per bucket]
-    RED = ['#FF0000', 1.00, 1.25]
-    BLUE = ['#0000FF', 1.25, 1.25]
-    GREEN = ['#00FF00', 2.75, 0.75]
+    # name = [hexcode, price per litre, litres per bucket, coverage per litre]
+    RED = ['#FF0000', 1.00, 1.25, 0.75]
+    BLUE = ['#0000FF', 1.25, 1.25, 0.5]
+    GREEN = ['#00FF00', 2.75, 0.75, 1.34]
     
     @classmethod
     def to_paint(self, paint_name):
@@ -59,15 +59,15 @@ class Paint(Enum):
 ### A wall
 class Wall():
     def __init__(self, shape, surface_area, paint):
-        self.paint = paint
-        self.shape = shape
-        self.surface_area = surface_area
-        self.paint_required = self._calc_required_volume()
-        # self.coats = coats
-        # self.protrustions = []
+        self.paint = Paint.RED
+        self.shape = Shape.SQUARE
+        self.surface_area = 0.0
+        self.paint_required = 0.0
+        self.coats = 1
+        self.protrustions = []
         
     def define(self):
-        wall_shape = self._get_shape()
+        self.shape = self._get_shape()
         wall_surface_area = self._calc_area(wall_shape)
         
         print("The surface area of this wall is: %.2f metres squared" % wall_surface_area) if wall_surface_area is not None else print("Surface area has not been calculated correctly!")
@@ -117,28 +117,21 @@ class Wall():
     def _calc_required_volume(self):
         return self.surface_area / self.paint.coverage_per_unit
 
-### A paint bucket
-class Paint():
-    def __init__(self, colour, rate_per_unit):
-        self.colour = colour
-        self.coverage_per_unit = rate_per_unit
-        # self.volume_per_bucket = volume_per_bucket
-        # self.cost = cost
-
 # Rooms
 class Room():
     def __init__(self):
         self.walls = []
     
     def define(self):
-        num_of_walls = get_int_input("Please enter the number of walls for this room")
+        num_of_walls = get_int_input("Please enter the number of walls for this room: ")
         
         valid_input = False
         while not valid_input:
             try:
                 self.walls = [Wall()] * num_of_walls
+                valid_input = True 
             except: 
-                num_of_walls = get_int_input("How many rooms are you wanting to paint?")
+                num_of_walls = get_int_input("Error! Please enter the number of walls for this room as a whole number: ")
         
         for wall in self.walls:
             wall.define()
@@ -146,30 +139,32 @@ class Room():
 ### The Calculator
 class Calculator():
     def __init__(self):
-        paint_details = self._get_paint_details()
-        temp_paint = Paint(paint_details[0], paint_details[1])
-
-        wall_details = self._get_wall_details()
-        temp_wall = Wall(wall_details[0], wall_details[1], temp_paint)
+        self.rooms = self._get_rooms() 
         
-        self.Walls = [temp_wall]
+    # def calc_cost(self):
+    #     for room in self.rooms:
+    #         for wall in room:
+    #             cost += wall.colour.cost
 
-    def get_rooms(self):
-        num_of_rooms = get_int_input("How many rooms are you wanting to paint?")
+    def _get_rooms(self):
+        num_of_rooms = get_int_input("How many rooms are you wanting to paint? ")
         
         valid_input = False
         while not valid_input:
             try:
                 rooms = [Room()] * num_of_rooms
+                valid_input = True 
             except: 
-                num_of_rooms = get_int_input("How many rooms are you wanting to paint?")
+                num_of_rooms = get_int_input("Error! Please enter the number of rooms you are wanting to paint as a whole number: ")
         
         for room in rooms:
             room.define()
+            
+        return rooms
 
 
     def _get_paint_details(self):
-        paint_name = input("What is the name/colour is the paint?: ")   
+        paint_name = input("What is the name/colour is the paint? ")   
         valid_input = False
         while not valid_input:
             confirmation = input("Are you sure you would like to identify this paint as: %s? (Y/N): "% paint_name).lower()  
@@ -180,7 +175,7 @@ class Calculator():
                 paint_name = input("Please enter a new identifier: ")
             else:
                 print("Error: You have not provided a valid answer!")   
-        paint_coverage = self._get_float_input("Please enter the many square meters your paint can cover per litre of paint: ")  
+        paint_coverage = get_float_input("Please enter the many square meters your paint can cover per litre of paint: ")  
         return (paint_name, paint_coverage)
 
 
