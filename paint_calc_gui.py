@@ -213,8 +213,11 @@ class Wall(Architecture):
         litres_required = (self.__surface_area * self.__coats) // self.__paint(2)
         return  round(litres_required // self.__paint(1))
     
-    def cost(self):
+    def get_cost(self):
         return self.required_buckets() * self.__paint(0)
+    
+    def get_paint(self): 
+        return self.__paint
     
     def __area_without_obstacles(self):
         for obstacle in self.__obstacles:
@@ -355,6 +358,9 @@ class Room():
     
     def get_walls(self):
         return self.__walls
+    
+    def get_name(self):
+        return self.__name
         
     def define(self, room_index):
         import PySimpleGUI as sg
@@ -469,32 +475,16 @@ class Calculator():
             match event:
                 case "Total Cost":
                     window.Disable()
-                    total_cost = 0
-                    for room in self.__rooms:
-                        for wall in room.get_walls():
-                            total_cost += wall.cost()
-                    temp_layout = [
-                        [sg.Text("Total Cost: %.2f" % total_cost)], 
-                        [sg.Button("OK")]
-                    ]
-
-                    temp_window = sg.Window("Total Cost", temp_layout)
-
-                    while True:
-                        event, values = temp_window.read()
-                        match event:
-                            case None | "OK":
-                                temp_window.close()
-                                break
-                            case _: 
-                                temp_window.close()
-                                break
-                            
+                    self.__total_cost()
                     window.Enable()
                 case "Total Paint":
-                    pass
-                case "Per Room:": 
-                    pass
+                    window.Disable()
+                    self.__total_paint()
+                    window.Enable()
+                case "Per Room": 
+                    window.Disable()
+                    self.__per_room()
+                    window.Enable()
                 case None | "CLOSE":
                     sys.exit()
                     break
@@ -504,14 +494,95 @@ class Calculator():
 
         window.close()
         
-    def __calc_cost(self):
-        cost = 0
-        for room in self.__rooms:
-            for wall in room.walls():
-                cost += wall.cost()
+    def __total_cost(self):
+        import PySimpleGUI as sg
         
-        return cost
+        total_cost = 0
+        for room in self.__rooms:
+            for wall in room.get_walls():
+                total_cost += wall.get_cost()
+        temp_layout = [
+            [sg.Text("Total Cost: %.2f" % total_cost)], 
+            [sg.Button("OK")]
+        ] 
+        
+        temp_window = sg.Window("Total Cost", temp_layout)
+        while True:
+            event, values = temp_window.read()
+            match event:
+                case None | "OK":
+                    temp_window.close()
+                    break
+                case _: 
+                    temp_window.close()
+                    break
+    def __total_paint(self):
+        import PySimpleGUI as sg
+        
+        total_red_paint = 0
+        total_green_paint = 0
+        total_blue_paint = 0
+        
+        for room in self.__rooms:
+            for wall in room.get_walls():
+                if wall.get_paint() == Paint.RED:
+                    total_red_paint += wall.required_buckets()
+                elif wall.get_paint() == Paint.GREEN:    
+                    total_green_paint += wall.required_buckets()
+                elif wall.get_paint() == Paint.BLUE:
+                    total_blue_paint += wall.required_buckets()
+                
+        temp_layout = [
+            [sg.Text("Total Red: %.2f" % total_red_paint)], 
+            [sg.Text("Total Blue: %.2f" % total_green_paint)], 
+            [sg.Text("Total Green: %.2f" % total_blue_paint)], 
+            [sg.Button("OK")]
+        ]
+        temp_window = sg.Window("Total Paint", temp_layout)
+        while True:
+            event, values = temp_window.read()
+            match event:
+                case None | "OK":
+                    temp_window.close()
+                    break
+                case _: 
+                    temp_window.close()
+                    break
+        
 
+    def __per_room(self):
+        import PySimpleGUI as sg
+        
+        temp_layout = [
+            [sg.Text("Please select a room: ")] 
+        ]
+        
+        name_check = []
+        for room in self.__rooms:
+            if room.get_name() not in name_check:
+                name_check.append(room.get_name())
+                temp_layout.append([sg.Button(room.get_name())])
+            
+        temp_layout.append([sg.Button("OK")])
+        
+        temp_window = sg.Window("Per Room", temp_layout)
+        while True:
+            event, values = temp_window.read()
+            match event:
+                case None | "OK":
+                    temp_window.close()
+                    break
+                case _: 
+                    for room in self.__rooms:
+                        if event == room.get_name():
+                            temp_window.Disable()
+                            self.__room_info(room)
+                            temp_window.Enable()
+        
+
+    def __room_info(self, room):
+        print("Room: %s" % room.get_name())
+        
     def __get_rooms(self): 
         import PySimpleGUI as sg
         import sys
@@ -613,6 +684,7 @@ if __name__ == '__main__':
 # Mention what measurement is being used
 # Implement a test
     # Pytest
+# Dictionary for total paints
 
 
 
