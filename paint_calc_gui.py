@@ -8,6 +8,8 @@ from tkinter import Button
 import PySimpleGUI as sg
 import sys
 
+# Global var for icon
+
 #########################################################################################
 ##################################### Enums #############################################
 #########################################################################################
@@ -212,12 +214,11 @@ class Wall(Architecture):
                 ]
         
         # This is shared across all shapes. So it is simply added at the end. 
-        layout.append(
-            [sg.Text("Enter the number of coats of paint you plan to apply to the wall:")], 
-            [sg.Multiline(size=(30,1), key='paint')], 
-            [sg.Button("CONFIRM")],
-            [sg.Button("CLOSE")]
-        )
+        layout.append([sg.Text("Enter the number of coats of paint you plan to apply to the wall:")])
+        layout.append([sg.Multiline(size=(30,1), key='paint')])
+        layout.append([sg.Button("CONFIRM")])
+        layout.append([sg.Button("CLOSE")])
+
         
         # Draw the new window 
         window = sg.Window("Wall Definition" , layout)
@@ -386,10 +387,8 @@ class Obstacle(Architecture):
                 ]     
         
         # These buttons are shared regardless of the shape. So they are appended afterwards. 
-        layout.append(
-            [sg.Button("CONFIRM")],
-            [sg.Button("CLOSE")]
-        )
+        layout.append([sg.Button("CONFIRM")])
+        layout.append([sg.Button("CLOSE")])
         
         # Create a new window with the above layout. 
         window = sg.Window("Paint Calculator", layout)
@@ -424,6 +423,9 @@ class Obstacle(Architecture):
         window.close()
 
 class Room():
+    '''Rooms do not inherit from Architecture as they do not share enough with how they have been defined. 
+    Instead, a room is functionally a collection of Wall() objects, with its own methods. 
+    '''
     def __init__(self):
         self.__walls = []
         self.__name = "default room"
@@ -436,6 +438,8 @@ class Room():
         return self.__name
     
     def get_cost(self):
+        """Calculates the total cost to paint the room by finding the cost of every wall and adding them together
+        """
         total_cost = 0
         for wall in self.__walls:
             total_cost += wall.get_cost()
@@ -443,8 +447,14 @@ class Room():
         return total_cost
         
     def define(self, room_index):
+        """Used to define the room itself.
+        It it just passed an index, which is used so the user can keep track of what room they are defining.
+        """
+        
         self.__index = room_index
         
+        # Create a window to ask for user input
+        # They will enter the details for the wall 
         layout = [
                 [sg.Text("Room No.%d" % self.__index)], 
                 [sg.Text("Please enter the details of this room:")], 
@@ -454,17 +464,20 @@ class Room():
                 [sg.Multiline(size=(30,1), key='walls')], 
                 [sg.Button("CONFIRM")],
                 [sg.Button("CLOSE")]
-            ] 
-                
-        window = sg.Window("Paint Calculator", layout)
+            ]    
+        window = sg.Window("Room Definition", layout)
         
+        # Keep the window open until a valid input is given 
         while True:
             event, values = window.read()
             match event:
                 case "CONFIRM":
+                    # Once the user clicks confirm, attempt to store their inputs
                     self.__name = values['name']
-                    window.Disable()
+
                     num_of_rooms = get_int_input(values['walls'], False)
+                    # Populate self.__walls() with the relative number of Wall() objects
+                    # They will be defined later
                     for i in range(0, num_of_rooms):
                         self.__walls.append(Wall()) 
                     break 
@@ -472,22 +485,32 @@ class Room():
                     sys.exit()
                 case _: 
                     pass
-            
+        
+        # Populate the room
+        # This is in regards to getting information on each wall
+        window.Disable()
         self.__populate()
         window.close()
         
     def __populate(self): 
+        '''The room is populated by get details on each wall within the room, and then defining the Wall() objects
+        '''
+        
+        # Valid shapes and colour choices used in the drop down menu 
         shapes = ["Square", "Rectangle", "Parallelogram", "Trapezoid", "Triangle", "Ellipse", "Cirlce", "Semicicle"]        
         colours = []
         for colour in Paint:   
             colours.append(colour.name.title())
         
+        
         wall_index = 1
         for wall in self.__walls:
             shape = "Square"
+            
+            # For each wall create a new window which will ask the user to enter information on that wall. 
             layout = [
                     [sg.Text("Wall No.%d of %d in %s" % (wall_index, len(self.__walls), self.__name))], 
-                    [sg.Text("Please enter the number of obstacles (doors/windows/etc): ")], 
+                    [sg.Text("Please enter the number of obstacles (doors/windows/areas that cannot be painted): ")], 
                     [sg.Multiline(size=(30,1), key='obstacles')], 
                     [sg.Text("Please select the shape of the wall from the drop down menu: ")], 
                     [sg.OptionMenu(values=shapes,size=(30,8), default_value='Square',key='shape')],
@@ -497,15 +520,18 @@ class Room():
                     [sg.Button("CLOSE")]
                 ]
             wall_index += 1
+            window = sg.Window("Room Definition", layout)
 
-            window = sg.Window("Paint Calculator", layout)
-
+            # Keep window open until valid input is given
             while True:
                 event, values = window.read()
                 match event:
                     case "CONFIRM":
+                        # When the user clicks confirm, attempt to store their inputs
+                        
                         shape = Shape.to_shape(values['shape'].lower())
                         colour = Paint.to_paint(values['colour'].lower())
+                        
                         window.Disable()
                         num_of_obstacles = get_int_input(values['obstacles'], True)
                         wall.define(shape, colour, num_of_obstacles)  
@@ -516,32 +542,47 @@ class Room():
                         pass   
             window.close()
         
-   
-        
-# The Calculator
 class Calculator():
+    '''Calculator is the main class for running the program.
+    This is where the base windows are called from in the hierarchy of windows. It is also where the program loop is located
+    '''
+    
     def __init__(self):       
         self.__rooms = []
-  
-        
+     
     def main(self):
-
+        '''Main simply loops through until the user closes the program.
+        On the final screen, the user can choose to restart. Which will return to the loop. 
+        '''
         while True:
+            # Get the number of rooms
             self.__rooms = self.__get_rooms()
 
+            # Define and populate each room
             room_index = 1
             for room in self.__rooms:
                 room.define(room_index)
                 room_index += 1
 
-            ## Final Screen
+            # Present the final screen where the user can get the results
             self.__final_screen()
 
         
 
     def __final_screen(self): 
+        '''This is the final window.
+        Here, the user can ask for:
+        - Total cost
+        - Total number of puckets per paint
+        - Per Room:
+            - Cost
+            - Number of buckets of each paint
+        '''
+        
+        # Create a new window to present results to the user 
         layout = [
-            [sg.Text("All values have been entered")], 
+            [sg.Text("All values have been entered!")], 
+            [sg.Text("Please select an option below: ")], 
             [sg.Button("Total Cost")],
             [sg.Button("Total Paint")],
             [sg.Button("Per Room")],
@@ -550,22 +591,28 @@ class Calculator():
         ]
         window = sg.Window("Paint Calculator", layout)
 
+        # Loop until valid input is given
         while True:
             event, values = window.read()
             match event:
                 case "Total Cost":
+                    # Call the total_cost() method, which will present a pop up with the costs 
                     window.Disable()
                     self.__total_cost()
                     window.Enable()
                 case "Total Paint":
+                    # Call the total_paint() method, which will present a pop up with the total number of buckets required for each paint used 
                     window.Disable()
                     self.__total_paint()
                     window.Enable()
                 case "Per Room": 
+                    # Call the per_room() method
+                    # This method creates a new winodw where the user can select one of their defined rooms
                     window.Disable()
                     self.__per_room()
                     window.Enable()
                 case "START AGAIN":
+                    # Exit this method and return to the main loop
                     window.close()
                     print("Test")
                     break
@@ -575,16 +622,22 @@ class Calculator():
                     sys.exit()
         
     def __total_cost(self):
+        '''Calculates the total cost for all rooms.
+        '''
+        # Iterates through each room, then each wall in each room, and adds the cost of that wall to the total 
         total_cost = 0
         for room in self.__rooms:
             for wall in room.get_walls():
                 total_cost += wall.get_cost()
+            
+        # Popup window created to present cost to user.     
         temp_layout = [
-            [sg.Text("Total Cost: %.2f" % total_cost)], 
+            [sg.Text("Total Cost: £%.2f" % total_cost)], 
             [sg.Button("OK")]
         ] 
-        
         temp_window = sg.Window("Total Cost", temp_layout)
+        
+        # Keep window open until valid input is given
         while True:
             event, values = temp_window.read()
             match event:
@@ -594,20 +647,28 @@ class Calculator():
                 case _: 
                     temp_window.close()
                     break
+      
     def __total_paint(self):
+        '''Calculate the total number of buckets required for each paint used. 
+        This is across all rooms.
+        '''
+        # Iterate through each room, then each wall in each room, and retrieve the amount of paint needed. 
+        # This is stored as a dictionary, with the {Paint: total cost}
         total_paint = {}
-        
         for room in self.__rooms:
             for wall in room.get_walls():          
-                total_paint[wall.get_paint()] = wall.required_buckets()
-                
+                total_paint[wall.get_paint()] += wall.required_buckets()
+            
+        # Generate a layout so that the correct number of paints are displayed.     
         temp_layout = []
-        
         for key, value in total_paint.items():
-            temp_layout.append([sg.Text("Total %s: %.2f" % (key.to_string(), value))])
+            temp_layout.append([sg.Text("Total %s: %.2f litres" % (key.to_string(), value))])
         temp_layout.append( [sg.Button("OK")])
         
+        # Create new popup window to display result 
         temp_window = sg.Window("Total Paint", temp_layout)
+        
+        # Keep window open until valid input is given
         while True:
             event, values = temp_window.read()
             match event:
@@ -620,19 +681,29 @@ class Calculator():
         
 
     def __per_room(self):
-        temp_layout = [
+        '''This method allows the user to view a list of rooms they have specified
+        They can then select a room, and view information on that room.
+        '''
+        
+        # the layout is appended to for each room 
+        layout = [
             [sg.Text("Please select a room: ")] 
         ]
         
+        # Iterate through each room 
+        # If rooms have duplicate names, then only one button is added
+        # In this case, both rooms will be presented one after the other 
         name_check = []
         for room in self.__rooms:
             if room.get_name() not in name_check:
                 name_check.append(room.get_name())
-                temp_layout.append([sg.Button(room.get_name())])
-            
-        temp_layout.append([sg.Button("OK")])
+                layout.append([sg.Button(room.get_name())])
+        layout.append([sg.Button("OK")])
         
-        temp_window = sg.Window("Per Room", temp_layout)
+        # Create new window
+        temp_window = sg.Window("Per Room", layout)
+        
+        # Keep window open until valid input is given 
         while True:
             event, values = temp_window.read()
             match event:
@@ -640,6 +711,8 @@ class Calculator():
                     temp_window.close()
                     break
                 case _: 
+                    # If the user selects a room, then iterate through the list of rooms until one with a matching name is found
+                    # Then, call the room_info() method with that room
                     for room in self.__rooms:
                         if event == room.get_name():
                             temp_window.Disable()
@@ -648,24 +721,29 @@ class Calculator():
         
 
     def __room_info(self, room):
+        '''Allows the user to view individual information on each room
+        '''
+        
+        # Generate layout for the window, then create the window
         layout = [
             [sg.Text("Room: %s" % room.get_name())], 
             [sg.Button("Cost")],
             [sg.Button("Paint")],
             [sg.Button("CLOSE")]
         ]
-        
         window = sg.Window("Per Room", layout)
+        
+        # Keep window open until valid input is given
         while True:
             event, values = window.read()
             match event:
                 case "Cost":
+                    # Display the cost fort this room in a popout window
                     cost = room.get_cost()
                     temp_layout = [
-                        [sg.Text("Total Cost: %.2f" % cost)], 
+                        [sg.Text("Total Cost: £%.2f" % cost)], 
                         [sg.Button("OK")]
                     ] 
-        
                     temp_window = sg.Window("Total Cost", temp_layout)
                     while True:
                         event, values = temp_window.read()
@@ -677,20 +755,27 @@ class Calculator():
                                 temp_window.close()
                                 break
                 case "Paint":
+                    # Calculate the total amount of each paint used
+                    # This is stored in a dict = {Paint : Total cost}
                     total_paint = {}
         
+                    # Get the paint used in each room and add it
                     for room in self.__rooms:
                         for wall in room.get_walls():
                             paint_colour = wall.get_paint()            
                             total_paint[wall.get_paint()] = wall.required_buckets()
 
+                    
+                    # Create a layout to display each used paint and the amount required
                     temp_layout = []
-
                     for key, value in total_paint.items():
-                        temp_layout.append([sg.Text("Total %s: %.2f" % (key.to_string(), value))])
+                        temp_layout.append([sg.Text("Total %s: %.2f litres" % (key.to_string(), value))])
                     temp_layout.append( [sg.Button("OK")])
 
+                    # Create popup window to display information
                     temp_window = sg.Window("Total Paint", temp_layout)
+                    
+                    # Keep window open until valid input is given
                     while True:
                         event, values = temp_window.read()
                         match event:
@@ -709,11 +794,14 @@ class Calculator():
                 
         
        
-        
+       
     def __get_rooms(self): 
+        '''Get the number of rooms which are being painted
+        '''
         layout = [[sg.Text('Please enter the number of rooms you wish to paint in the box below:')], [sg.Multiline(size=(30,1), key='textbox')], [sg.Button("CONFIRM")], [sg.Button("CLOSE")]] 
         window = sg.Window("Paint Calculator", layout)
         
+        # Keep window open until valid input is given
         while True:
             event, values = window.read()
             match event:
