@@ -1,4 +1,6 @@
 import unittest
+import math
+from enum import Enum
 
 #########################################################################################
 ################################# Testing ###############################################
@@ -68,8 +70,65 @@ class TestInputHandling(unittest.TestCase):
             self.assertEqual(get_float_input(i, True), 'Error: Please enter a positive number: ')
             self.assertEqual(get_float_input(i, False), 'Error: Please enter a positive, non zero, number: ')  
 
+    def test_area_square(self):
+        lengths = [1, 10, 100, 1000, 10000]   
+        square = Shape.SQUARE
         
+        for length in lengths:
+            self.assertEqual(square(length), length * length)
+        
+    
+    def test_area_rectangle(self):
+        heights = [1, 10, 100, 1000, 10000]   
+        widths = [1, 10, 100, 1000, 10000]  
+        rect = Shape.RECTANGLE
+        
+        for height in heights:
+            for width in widths:
+                self.assertEqual(rect(height, width), height * width)
+    
+    def test_area_parallelogram(self):
+        bases = [1, 10, 100, 1000, 10000]   
+        heights = [1, 10, 100, 1000, 10000] 
+        para = Shape.PARALLELOGRAM 
+        
+        for base in bases:
+            for height in heights:
+                self.assertEqual(para(base, height), height * base)
+    
+    def test_area_trapezoid(self):
+        bases = [1, 10, 100, 1000, 10000]   
+        heights = [1, 10, 100, 1000, 10000] 
+        tops = [1, 10, 100, 1000, 10000] 
+        trap = Shape.TRAPEZOID 
 
+        for base in bases:
+            for height in heights:
+                for top in tops:
+                    self.assertEqual(trap(base, height, top), ((top + base) // 2) * height)
+    
+    def test_area_triangle(self):
+        bases = [1, 10, 100, 1000, 10000]   
+        heights = [1, 10, 100, 1000, 10000] 
+        tri = Shape.TRIANGLE
+        
+        for base in bases: 
+            for height in heights: 
+                self.assertEqual(tri(base, height), (base * height) * 0.5)
+    
+    def test_area_circle(self):
+        radis =  [1, 10, 100, 1000, 10000]
+        circ = Shape.CIRCLE
+  
+        for radi in radis:
+            self.assertEqual(circ(radi), (math.pi * pow(radi, 2))) 
+    
+    def test_area_semicircle(self):
+        radis =  [1, 10, 100, 1000, 10000]
+        scirc = Shape.SEMICIRCLE
+  
+        for radi in radis:
+            self.assertEqual(scirc(radi), (math.pi * pow(radi, 2)) // 2)
     
 
 
@@ -81,6 +140,54 @@ class TestInputHandling(unittest.TestCase):
 """Methods have been altered to remove the GUI elements
 Now. they Just return a string used which reference "branch" has been addressed
 """
+
+class Shape(Enum):
+    """Shapes store a lambda function used to evaluate their area
+    They can then be easily calculated if I store a shape object on a wall/obstacles/etc. 
+    """
+    SQUARE = lambda b: pow(b, 2)
+    RECTANGLE = lambda b, h: b * h
+    PARALLELOGRAM = lambda b, h: b * h
+    TRAPEZOID = lambda b, h, a: ((a + b) // 2) * h
+    TRIANGLE = lambda b, h: 0.5 * (b * h)
+    ELLIPSE = lambda b, a: math.pi * (a*b)
+    CIRCLE = lambda r: math.pi * pow(r, 2)
+    SEMICIRCLE = lambda r: (math.pi * pow(r, 2)) // 2
+    
+    def __call__(self, args):
+        """Override the usual call method to instead allow for the supplying of a variety of multiple args.
+        These args are then passed to the matching lambda function to calculate the respective area. 
+        """
+        return self.value[0](args)
+    
+    @classmethod
+    def to_shape(self, shape_name):
+        """This is a class method, meaning it does not need to be called on a Shape object.
+        The method is passed a string, which it will then attempt to return a matching shape for.  
+        Error handling is not needed, because the user will only ever select from a drop down. 
+        """
+        match shape_name:
+            case "square":
+                return Shape.SQUARE
+            case "rectangle":
+                return Shape.RECTANGLE
+            case "parallelogram":
+                return Shape.PARALLELOGRAM
+            case "trapezoid":
+                return Shape.TRAPEZOID
+            case "triangle":
+                return Shape.TRIANGLE
+            case "ellipse":
+                return Shape.ELLIPSE
+            case "circle":
+                return Shape.CIRCLE
+            case "semicircle":
+                return Shape.SEMICIRCLE
+            case _:
+                return None
+
+
+
 
 def get_float_input(usr_input, allow_zero):
     """ Returns a provided string input as a float. 
@@ -112,6 +219,7 @@ def get_float_input(usr_input, allow_zero):
         return text
     elif valid_input:
         return "Valid Input"
+
     
 def get_int_input(usr_input, allow_zero):
     """ Returns a provided string input as a float. 

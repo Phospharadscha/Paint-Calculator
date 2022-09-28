@@ -1,10 +1,10 @@
+#########################################################################################
+##################################### Imports #############################################
+#########################################################################################
+
 from abc import abstractmethod
-from asyncio import constants
-from email.utils import parseaddr
 from enum import Enum
-from functools import total_ordering
 import math
-from tkinter import Button 
 import PySimpleGUI as sg
 import sys
 
@@ -290,7 +290,6 @@ class Wall(Architecture):
     def __area_with_obstacles(self):
         """Calculates the area of the wall when accounting for obstacles
         """
-        
         for obstacle in self.__obstacles:
             self.__surface_area -= obstacle._area()
 
@@ -499,7 +498,7 @@ class Room():
         '''
         
         # Valid shapes and colour choices used in the drop down menu 
-        shapes = ["Square", "Rectangle", "Parallelogram", "Trapezoid", "Triangle", "Ellipse", "Cirlce", "Semicicle"]        
+        shapes = ["Square", "Rectangle", "Parallelogram", "Trapezoid", "Triangle", "Ellipse", "Circle", "Semicircle"]        
         colours = []
         for colour in Paint:   
             colours.append(colour.name.title())
@@ -616,7 +615,6 @@ class Calculator():
                 case "START AGAIN":
                     # Exit this method and return to the main loop
                     window.close()
-                    print("Test")
                     break
                 case None | "CLOSE":
                     sys.exit()
@@ -666,9 +664,10 @@ class Calculator():
                     total_paint[wall.get_paint()] = wall.required_buckets()
             
         # Generate a layout so that the correct number of paints are displayed.     
-        temp_layout = []
+        temp_layout = [[sg.Text("Total of each paint used can be found below. Along with a margin of error of 10 percent")]]
         for key, value in total_paint.items():
-            temp_layout.append([sg.Text("Total %s: %.0f buckets" % (key.name.title(), value))])
+            margin_error = float(value // 10)
+            temp_layout.append([sg.Text("Total %s: %.0f buckets (± %.2f buckets)" % (key.name.title(), value, margin_error))])
         temp_layout.append( [sg.Button("OK")])
         
         # Create new popup window to display result 
@@ -776,9 +775,10 @@ class Calculator():
 
                     
                     # Create a layout to display each used paint and the amount required
-                    temp_layout = []
+                    temp_layout = [[sg.Text("Total of each paint used can be found below. Along with a margin of error of 10 percent")]]
                     for key, value in total_paint.items():
-                        temp_layout.append([sg.Text("Total %s: %.0f buckets" % (key.name.title(), value))])
+                        margin_error = float(value // 10)
+                        temp_layout.append([sg.Text("Total %s: %.0f buckets (± %.2f buckets)" % (key.name.title(), value, margin_error))])
                     temp_layout.append( [sg.Button("OK")])
 
                     # Create popup window to display information
@@ -939,7 +939,8 @@ if __name__ == '__main__':
 # Assumptions :
 # Buying paint by bucket, not raw volume 
 # Distance measurements in metres
+# Area in meters squared
 # Liquid measurements in litres
 # This is a system that will be deployed by a company. They will specify what paints are available.
     # User does not specify paints
-# User does specify how many coats they intend to apply
+# User does specify how many coats they intend to apply, it is not decided by the paint
