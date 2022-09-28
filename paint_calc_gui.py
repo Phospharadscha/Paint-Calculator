@@ -140,102 +140,98 @@ class Wall(Architecture):
         """init is overrided due to additional variables.
         All values are assigned as a defualt and updated later. 
         """
-        
         self.__paint = Paint.WHITE
         self.__surface_area = 0.0
         self.__coats = 1
         self.__obstacles = []
         
     def define(self, shape, colour, num_of_obstacles):  
-        """init is overrided due to additional variables.
-        All values are assigned as a defualt and updated later. 
+        """Deine in wall is used to specify the details of the wall, including:
+        - Dimensions
+        - Number of coats they want to apply
         """
-            
+        
+        # Populates self.__obstacles with the supplied number of Obstacle objects
         num_of_values = 0 
         for i in range(0, num_of_obstacles):
             self.__obstacles.append(Obstacle())
         obstacle_index = 1
         
+        # Define each obstacle before defining the wall
         for obstacle in self.__obstacles:
             obstacle.define(obstacle_index, len(self.__obstacles))
             obstacle_index += 1 
         
+        # Define the layout for the prompt window so that it asks for the variables required of the supplied shape. 
+        # E.g. a square only needs the length of one side, but a rectangle needs the height and width. 
+        # num_of_values is used later to specify the number of expected inputs later. 
         match shape:
             case Shape.RECTANGLE | Shape.PARALLELOGRAM | Shape.TRIANGLE:
                 num_of_values = 2 
                 layout = [
-                    [sg.Text("Please enter the details of this wall:")], 
-                    [sg.Text("Enter the length of the base of the wall:")], 
+                    [sg.Text("Please enter the details for this wall:")], 
+                    [sg.Text("Enter the length of the base of the wall in metres:")], 
                     [sg.Multiline(size=(30,1), key='val1')], 
-                    [sg.Text("Enter the height of the wall:")], 
-                    [sg.Multiline(size=(30,1), key='val2')], 
-                    [sg.Text("Enter the number of coats side you plan to apply to the wall:")], 
-                    [sg.Multiline(size=(30,1), key='paint')], 
-                    [sg.Button("CONFIRM")],
-                    [sg.Button("CLOSE")]
+                    [sg.Text("Enter the height of the wall in metres:")], 
+                    [sg.Multiline(size=(30,1), key='val2')]
                 ]
             case Shape.TRAPEZOID:
                 num_of_values = 3 
                 layout = [
-                    [sg.Text("Please enter the details of this wall:")], 
-                    [sg.Text("Enter the length of the base of the wall:")], 
+                    [sg.Text("Please enter the details for this wall:")], 
+                    [sg.Text("Enter the length of the base of the wall in metres:")], 
                     [sg.Multiline(size=(30,1), key='val1')],
                     [sg.Text("Enter the height of the wall:")], 
                     [sg.Multiline(size=(30,1), key='val2')], 
-                    [sg.Text("Enter the length of the top of the wall:")], 
-                    [sg.Multiline(size=(30,1), key='val3')],  
-                    [sg.Text("Enter the number of coats side you plan to apply to the wall:")], 
-                    [sg.Multiline(size=(30,1), key='paint')], 
-                    [sg.Button("CONFIRM")],
-                    [sg.Button("CLOSE")]
+                    [sg.Text("Enter the length of the top of the wall in metres:")], 
+                    [sg.Multiline(size=(30,1), key='val3')]
                 ]
             case Shape.ELLIPSE:
                 num_of_values = 2
                 layout = [
-                    [sg.Text("Please enter the details of this wall:")], 
-                    [sg.Text("Enter the vertical radius the wall:")], 
+                    [sg.Text("Please enter the details for this wall:")], 
+                    [sg.Text("Enter the vertical radius the wall in metres:")], 
                     [sg.Multiline(size=(30,1), key='val1')],
-                    [sg.Text("Enter the horizontal radius the wall:")], 
-                    [sg.Multiline(size=(30,1), key='val2')], 
-                    [sg.Text("Enter the number of coats side you plan to apply to the wall:")], 
-                    [sg.Multiline(size=(30,1), key='paint')], 
-                    [sg.Button("CONFIRM")],
-                    [sg.Button("CLOSE")]
+                    [sg.Text("Enter the horizontal radius the wall in metres:")], 
+                    [sg.Multiline(size=(30,1), key='val2')] 
                 ]
             case Shape.CIRCLE | Shape.SEMICIRCLE:
                 num_of_values = 1
                 layout = [
-                    [sg.Text("Please enter the details of this wall:")], 
+                    [sg.Text("Please enter the details for this wall:")], 
                     [sg.Text("Enter the radius the wall:")], 
-                    [sg.Multiline(size=(30,1), key='val1')],
-                    [sg.Text("Enter the number of coats side you plan to apply to the wall:")], 
-                    [sg.Multiline(size=(30,1), key='paint')], 
-                    [sg.Button("CONFIRM")],
-                    [sg.Button("CLOSE")]
+                    [sg.Multiline(size=(30,1), key='val1')]
                 ]
             case _: # Default case is a square
                 num_of_values = 1 
                 layout = [
                     [sg.Text("Please enter the details of this wall:")], 
                     [sg.Text("Enter the length of one side of the wall:")], 
-                    [sg.Multiline(size=(30,1), key='val1')], 
-                    [sg.Text("Enter the number of coats side you plan to apply to the wall:")], 
-                    [sg.Multiline(size=(30,1), key='paint')], 
-                    [sg.Button("CONFIRM")],
-                    [sg.Button("CLOSE")]
+                    [sg.Multiline(size=(30,1), key='val1')]     
                 ]
-                
-            
-                
+        
+        # This is shared across all shapes. So it is simply added at the end. 
+        layout.append(
+            [sg.Text("Enter the number of coats of paint you plan to apply to the wall:")], 
+            [sg.Multiline(size=(30,1), key='paint')], 
+            [sg.Button("CONFIRM")],
+            [sg.Button("CLOSE")]
+        )
+        
+        # Draw the new window 
         window = sg.Window("Paint Calculator", layout)
         
         dimensions = []
         coats = 0
-                
+        
+        # Until loop (keep the window open) until a valid input is given     
         while True:
           event, values = window.read()
+          
+          # Match the event (user interaction)
           match event:
               case "CONFIRM":
+                # If the user presses the confirm button, then retrieve all of thir inputs 
                 coats = get_int_input(values['paint'], False)
                 if num_of_values == 1:
                     dimensions.append(get_float_input(values['val1'],  False))
@@ -251,27 +247,46 @@ class Wall(Architecture):
                   sys.exit()
               case _: 
                  pass
-                 
+        
+        # Assign inputted values
         self.__paint = colour
         self.__coats = coats
         
         window.Disable()
+        
+        # Calculate the area of the wall
         self.__surface_area = self._calc_area(shape, dimensions)
+       
+        # If there are obstacles, then remove their surface area from the wall. 
         if len(self.__obstacles) != 0: 
             self.__area_with_obstacles
         window.close()
     
     def __required_buckets(self):
+        """Returns the amount of paint required to cover the wall. 
+        """
+        import math
+        
         litres_required = (self.__surface_area * self.__coats) // self.__paint(2)
-        return  round(litres_required // self.__paint(1))
+        
+        # Value is rounded up, since you can't purchase .something of a bucket. 
+        return math.ceil(litres_required // self.__paint(1))
     
     def get_cost(self):
+        """Returns the cost of covering the wall.
+        """
         return self.required_buckets() * self.__paint(0)
     
     def get_paint(self): 
+        """Returns the paint used on the wall. 
+        """
+        
         return self.__paint
     
     def __area_with_obstacles(self):
+        """Calculates the area of the wall when accounting for obstacles
+        """
+        
         for obstacle in self.__obstacles:
             self.__surface_area -= obstacle._area()
 
