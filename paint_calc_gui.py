@@ -8,6 +8,7 @@ from tkinter import Button
 import PySimpleGUI as sg
 import sys
 
+icon_logo = "icon.png"
 # Global var for icon
 
 #########################################################################################
@@ -221,7 +222,7 @@ class Wall(Architecture):
 
         
         # Draw the new window 
-        window = sg.Window("Wall Definition" , layout)
+        window = sg.Window("Wall Definition" , layout, icon=icon_logo)
         
         dimensions = []
         coats = 0
@@ -268,11 +269,13 @@ class Wall(Architecture):
         """Returns the amount of paint required to cover the wall. 
         """
         import math
-        
         litres_required = (self.__surface_area * self.__coats) // self.__paint(2)
         
         # Value is rounded up, since you can't purchase .something of a bucket. 
-        return math.ceil(litres_required // self.__paint(1))
+        b_req = math.ceil(litres_required // self.__paint(1))
+        if b_req == 0:  b_req += 1 
+        
+        return b_req
     
     def get_cost(self):
         """Returns the cost of covering the wall.
@@ -315,7 +318,7 @@ class Obstacle(Architecture):
             ] 
         
         # Create a window and keep it open until a valid interaction is given. 
-        window = sg.Window("Obstacle Definition", layout)
+        window = sg.Window("Obstacle Definition", layout, icon=icon_logo)
         while True:
             event, values = window.read()
             match event:
@@ -390,7 +393,7 @@ class Obstacle(Architecture):
         layout.append([sg.Button("CLOSE")])
         
         # Create a new window with the above layout. 
-        window = sg.Window("Paint Calculator", layout)
+        window = sg.Window("Paint Calculator", layout, icon=icon_logo)
         
         dimensions = []
         coats = 0
@@ -464,7 +467,7 @@ class Room():
                 [sg.Button("CONFIRM")],
                 [sg.Button("CLOSE")]
             ]    
-        window = sg.Window("Room Definition", layout)
+        window = sg.Window("Room Definition", layout, icon=icon_logo)
         
         # Keep the window open until a valid input is given 
         while True:
@@ -519,7 +522,7 @@ class Room():
                     [sg.Button("CLOSE")]
                 ]
             wall_index += 1
-            window = sg.Window("Room Definition", layout)
+            window = sg.Window("Room Definition", layout, icon=icon_logo)
 
             # Keep window open until valid input is given
             while True:
@@ -588,7 +591,7 @@ class Calculator():
             [sg.Button("START AGAIN")], 
             [sg.Button("CLOSE")]
         ]
-        window = sg.Window("Paint Calculator", layout)
+        window = sg.Window("Paint Calculator", layout, icon=icon_logo)
 
         # Loop until valid input is given
         while True:
@@ -634,7 +637,7 @@ class Calculator():
             [sg.Text("Total Cost: £%.2f" % total_cost)], 
             [sg.Button("OK")]
         ] 
-        temp_window = sg.Window("Total Cost", temp_layout)
+        temp_window = sg.Window("Total Cost", temp_layout, icon=icon_logo)
         
         # Keep window open until valid input is given
         while True:
@@ -665,11 +668,11 @@ class Calculator():
         # Generate a layout so that the correct number of paints are displayed.     
         temp_layout = []
         for key, value in total_paint.items():
-            temp_layout.append([sg.Text("Total %s: %.2f litres" % (key.name.title(), value))])
+            temp_layout.append([sg.Text("Total %s: %.0f buckets" % (key.name.title(), value))])
         temp_layout.append( [sg.Button("OK")])
         
         # Create new popup window to display result 
-        temp_window = sg.Window("Total Paint", temp_layout)
+        temp_window = sg.Window("Total Paint", temp_layout, icon=icon_logo)
         
         # Keep window open until valid input is given
         while True:
@@ -704,7 +707,7 @@ class Calculator():
         layout.append([sg.Button("OK")])
         
         # Create new window
-        temp_window = sg.Window("Per Room", layout)
+        temp_window = sg.Window("Per Room", layout, icon=icon_logo)
         
         # Keep window open until valid input is given 
         while True:
@@ -734,7 +737,7 @@ class Calculator():
             [sg.Button("Paint")],
             [sg.Button("CLOSE")]
         ]
-        window = sg.Window("Per Room", layout)
+        window = sg.Window("Per Room", layout, icon=icon_logo)
         
         # Keep window open until valid input is given
         while True:
@@ -747,7 +750,7 @@ class Calculator():
                         [sg.Text("Total Cost: £%.2f" % cost)], 
                         [sg.Button("OK")]
                     ] 
-                    temp_window = sg.Window("Total Cost", temp_layout)
+                    temp_window = sg.Window("Total Cost", temp_layout, icon=icon_logo)
                     while True:
                         event, values = temp_window.read()
                         match event:
@@ -775,11 +778,11 @@ class Calculator():
                     # Create a layout to display each used paint and the amount required
                     temp_layout = []
                     for key, value in total_paint.items():
-                        temp_layout.append([sg.Text("Total %s: %.2f litres" % (key.name.title(), value))])
+                        temp_layout.append([sg.Text("Total %s: %.0f buckets" % (key.name.title(), value))])
                     temp_layout.append( [sg.Button("OK")])
 
                     # Create popup window to display information
-                    temp_window = sg.Window("Total Paint", temp_layout)
+                    temp_window = sg.Window("Total Paint", temp_layout, icon=icon_logo)
                     
                     # Keep window open until valid input is given
                     while True:
@@ -805,7 +808,7 @@ class Calculator():
         '''Get the number of rooms which are being painted
         '''
         layout = [[sg.Text('Please enter the number of rooms you wish to paint in the box below:')], [sg.Multiline(size=(30,1), key='textbox')], [sg.Button("CONFIRM")], [sg.Button("CLOSE")]] 
-        window = sg.Window("Paint Calculator", layout)
+        window = sg.Window("Paint Calculator", layout, icon=icon_logo)
         
         # Keep window open until valid input is given
         while True:
@@ -824,7 +827,6 @@ class Calculator():
                 case _: 
                     pass
         
-
 
 #########################################################################################
 ############################## Error - Handling #########################################
@@ -861,7 +863,7 @@ def get_float_input(usr_input, allow_zero):
             
             # Create new window asking for corrected input
             layout = [[sg.Text(text)], [sg.Multiline(size=(30,1), key='textbox')], [sg.Button("CONFIRM")], [sg.Button("CLOSE")]]
-            window = sg.Window("Error! Invalid Input", layout) 
+            window = sg.Window("Error! Invalid Input", layout, icon=icon_logo) 
         elif valid_input:
              # Temporary window is created so that any actual window can be closed before method exits. 
             window = sg.Window("Paint Calculator") 
@@ -910,7 +912,7 @@ def get_int_input(usr_input, allow_zero):
             
             # Create new window asking for corrected input
             layout = [[sg.Text(text)], [sg.Multiline(size=(30,1), key='textbox')], [sg.Button("CONFIRM")], [sg.Button("CLOSE")]]
-            window = sg.Window("Error! Invalid Input", layout) 
+            window = sg.Window("Error! Invalid Input", layout, icon=icon_logo) 
         elif valid_input:
             # Temporary window is created so that any actual window can be closed before method exits. 
             window = sg.Window("Paint Calculator") 
@@ -934,14 +936,6 @@ if __name__ == '__main__':
     calculator = Calculator()
     calculator.main()
     
-# TODO - Important
-# Change box headers to suit context
-# Mention what measurement is being used
-# Implement a test
-    # Pytest
-
-
-
 # Assumptions :
 # Buying paint by bucket, not raw volume 
 # Distance measurements in metres
