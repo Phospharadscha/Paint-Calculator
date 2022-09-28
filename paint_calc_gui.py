@@ -1,7 +1,6 @@
 #########################################################################################
 ##################################### Imports #############################################
 #########################################################################################
-
 from abc import abstractmethod
 from enum import Enum
 import math
@@ -9,7 +8,6 @@ import PySimpleGUI as sg
 import sys
 
 icon_logo = "icon.png"
-# Global var for icon
 
 #########################################################################################
 ##################################### Enums #############################################
@@ -64,8 +62,9 @@ class Shape(Enum):
 # Paints
 class Paint(Enum):
     """Paints are stored by their colour, with the value being the:
-    (Price per bucket, litres per bucket, coverage per litre)
+    (Price per bucke (GBP), litres per bucket, coverage per litre (m^2))
     Error handling is not needed, because the user will only ever select from a drop down.
+    Values used here come from https://www.wickes.co.uk : A random assortment of paints were selected to ensure variety of values
     """
     EMERALD = (24, 2.5, 13)
     SAPPHIRE = (20, 2.5, 13)
@@ -763,13 +762,12 @@ class Calculator():
                     total_paint = {}
         
                     # Get the paint used in each room and add it
-                    for room in self.__rooms:
-                        for wall in room.get_walls():  
-                            keys = total_paint.keys()
-                            if wall.get_paint() in keys:
-                                total_paint[wall.get_paint()] += wall.required_buckets()
-                            else: 
-                                total_paint[wall.get_paint()] = wall.required_buckets()
+                    for wall in room.get_walls():  
+                        keys = total_paint.keys()
+                        if wall.get_paint() in keys:
+                            total_paint[wall.get_paint()] += wall.required_buckets()
+                        else: 
+                            total_paint[wall.get_paint()] = wall.required_buckets()
 
                     
                     # Create a layout to display each used paint and the amount required

@@ -5,74 +5,8 @@ from enum import Enum
 #########################################################################################
 ################################# Testing ###############################################
 #########################################################################################
-
-class TestInputHandling(unittest.TestCase):
-    
-    ############### Integer-related tests ############### 
-    def test_int_pos(self):
-        pos_integers = ["1", "2", "10", "20", "250", "1050"]
-        for i in pos_integers: 
-            self.assertEqual(get_int_input(i, True), "Valid Input")
-            self.assertEqual(get_int_input(i, False), "Valid Input")
-    
-    def test_int_negative(self):
-        neg_integers = ["-1", "-2", '-10', "-20", "-250", "-1050"]
-        for i in neg_integers: 
-            self.assertEqual(get_int_input(i, True), 'Error: Please enter a positive whole number: ')
-            self.assertEqual(get_int_input(i, False), 'Error: Please enter a positive, non zero, whole number: ')
-
-    def test_int_zero(self):
-        self.assertEqual(get_int_input("0", True), "Valid Input")
-        self.assertEqual(get_int_input("0", False), 'Error: Please enter a positive, non zero, whole number: ')
-    
-    def test_int_float(self):
-        floats = ["1.0", "2.1", "10.21", "20.321", "250.4321", "1050.54321", "-1.0", "-2.1", "-10.21", "-20.321", "-250.4321", "-1050.54321"]
-        for i in floats: 
-            self.assertEqual(get_int_input(i, True), 'Error: Please enter a positive whole number: ')
-            self.assertEqual(get_int_input(i, False), 'Error: Please enter a positive, non zero, whole number: ') 
-    
-    def test_int_string(self):
-        strings = ["Test", "Wall", "Room", "La-Li-Lu-Le-Lo"]
-        for i in strings:
-            self.assertEqual(get_int_input(i, True), 'Error: Please enter a positive whole number: ')
-            self.assertEqual(get_int_input(i, False), 'Error: Please enter a positive, non zero, whole number: ')  
-
-    ############### Float-related tests ############### 
-    def test_float_pos(self):
-        pos_floats = ["1.0", "2.1", "10.21", "20.321", "250.4321", "1050.54321"]
-        for i in pos_floats: 
-            self.assertEqual(get_float_input(i, True), "Valid Input")
-            self.assertEqual(get_float_input(i, False), "Valid Input")
-    
-    def test_float_negative(self):
-        neg_floats = ["-1.0", "-2.1", "-10.21", "-20.321", "-250.4321", "-1050.54321"]
-        for i in neg_floats: 
-            self.assertEqual(get_float_input(i, True), "Error: Please enter a positive number: ")
-            self.assertEqual(get_float_input(i, False), "Error: Please enter a positive, non zero, number: ")
-               
-    def test_float_zero(self):
-        self.assertEqual(get_float_input("0", True), "Valid Input")
-        self.assertEqual(get_float_input("0", False), 'Error: Please enter a positive, non zero, number: ')
-        
-    def test_float_int(self):
-        integers_pos = ["1", "2", "10", "20", "250", "1050"]
-        integers_neg = ["-1", "-2", '-10', "-20", "-250", "-1050"]
-        
-        for i in integers_pos: 
-            self.assertEqual(get_float_input(i, True), 'Valid Input')
-            self.assertEqual(get_float_input(i, False), 'Valid Input') 
-        
-        for i in integers_neg: 
-            self.assertEqual(get_float_input(i, True), 'Error: Please enter a positive number: ')
-            self.assertEqual(get_float_input(i, False), 'Error: Please enter a positive, non zero, number: ')  
-        
-    def test_float_string(self):
-        strings = ["Test", "Wall", "Room", "La-Li-Lu-Le-Lo"]
-        for i in strings:
-            self.assertEqual(get_float_input(i, True), 'Error: Please enter a positive number: ')
-            self.assertEqual(get_float_input(i, False), 'Error: Please enter a positive, non zero, number: ')  
-
-    ############### Shape-related tests ############### 
+class TestShapes(unittest.TestCase):
+        ############### Shape-related tests ############### 
     def test_area_square(self):
         lengths = [1, 10, 100, 1000, 10000]   
         square = Shape.SQUARE
@@ -152,9 +86,71 @@ class TestInputHandling(unittest.TestCase):
         self.assertEqual(Shape.to_shape('CIRCLE'), None)
         self.assertEqual(Shape.to_shape('SEMICIRCLE'), None)
     
+class TestInputHandling(unittest.TestCase):
+    
+    ############### Integer-related tests ############### 
+    def test_int_pos(self):
+        pos_integers = ["1", "2", "10", "20", "250", "1050"]
+        for i in pos_integers: 
+            self.assertEqual(get_int_input(i, True), "Valid Input")
+            self.assertEqual(get_int_input(i, False), "Valid Input")
+    
+    def test_int_negative(self):
+        neg_integers = ["-1", "-2", '-10', "-20", "-250", "-1050"]
+        for i in neg_integers: 
+            self.assertEqual(get_int_input(i, True), 'Error: Please enter a positive whole number: ')
+            self.assertEqual(get_int_input(i, False), 'Error: Please enter a positive, non zero, whole number: ')
 
+    def test_int_zero(self):
+        self.assertEqual(get_int_input("0", True), "Valid Input")
+        self.assertEqual(get_int_input("0", False), 'Error: Please enter a positive, non zero, whole number: ')
+    
+    def test_int_float(self):
+        floats = ["1.0", "2.1", "10.21", "20.321", "250.4321", "1050.54321", "-1.0", "-2.1", "-10.21", "-20.321", "-250.4321", "-1050.54321"]
+        for i in floats: 
+            self.assertEqual(get_int_input(i, True), 'Error: Please enter a positive whole number: ')
+            self.assertEqual(get_int_input(i, False), 'Error: Please enter a positive, non zero, whole number: ') 
+    
+    def test_int_string(self):
+        strings = ["Test", "Wall", "Room", "La-Li-Lu-Le-Lo"]
+        for i in strings:
+            self.assertEqual(get_int_input(i, True), 'Error: Please enter a positive whole number: ')
+            self.assertEqual(get_int_input(i, False), 'Error: Please enter a positive, non zero, whole number: ')  
 
-
+    ############### Float-related tests ############### 
+    def test_float_pos(self):
+        pos_floats = ["1.0", "2.1", "10.21", "20.321", "250.4321", "1050.54321"]
+        for i in pos_floats: 
+            self.assertEqual(get_float_input(i, True), "Valid Input")
+            self.assertEqual(get_float_input(i, False), "Valid Input")
+    
+    def test_float_negative(self):
+        neg_floats = ["-1.0", "-2.1", "-10.21", "-20.321", "-250.4321", "-1050.54321"]
+        for i in neg_floats: 
+            self.assertEqual(get_float_input(i, True), "Error: Please enter a positive number: ")
+            self.assertEqual(get_float_input(i, False), "Error: Please enter a positive, non zero, number: ")
+               
+    def test_float_zero(self):
+        self.assertEqual(get_float_input("0", True), "Valid Input")
+        self.assertEqual(get_float_input("0", False), 'Error: Please enter a positive, non zero, number: ')
+        
+    def test_float_int(self):
+        integers_pos = ["1", "2", "10", "20", "250", "1050"]
+        integers_neg = ["-1", "-2", '-10', "-20", "-250", "-1050"]
+        
+        for i in integers_pos: 
+            self.assertEqual(get_float_input(i, True), 'Valid Input')
+            self.assertEqual(get_float_input(i, False), 'Valid Input') 
+        
+        for i in integers_neg: 
+            self.assertEqual(get_float_input(i, True), 'Error: Please enter a positive number: ')
+            self.assertEqual(get_float_input(i, False), 'Error: Please enter a positive, non zero, number: ')  
+        
+    def test_float_string(self):
+        strings = ["Test", "Wall", "Room", "La-Li-Lu-Le-Lo"]
+        for i in strings:
+            self.assertEqual(get_float_input(i, True), 'Error: Please enter a positive number: ')
+            self.assertEqual(get_float_input(i, False), 'Error: Please enter a positive, non zero, number: ')  
 
 #########################################################################################
 ########################### Methods/Classes being tested ###############################
