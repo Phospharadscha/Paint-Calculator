@@ -7,6 +7,8 @@ from enum import Enum
 #########################################################################################
 
 class TestInputHandling(unittest.TestCase):
+    
+    ############### Integer-related tests ############### 
     def test_int_pos(self):
         pos_integers = ["1", "2", "10", "20", "250", "1050"]
         for i in pos_integers: 
@@ -23,7 +25,6 @@ class TestInputHandling(unittest.TestCase):
         self.assertEqual(get_int_input("0", True), "Valid Input")
         self.assertEqual(get_int_input("0", False), 'Error: Please enter a positive, non zero, whole number: ')
     
-
     def test_int_float(self):
         floats = ["1.0", "2.1", "10.21", "20.321", "250.4321", "1050.54321", "-1.0", "-2.1", "-10.21", "-20.321", "-250.4321", "-1050.54321"]
         for i in floats: 
@@ -36,6 +37,7 @@ class TestInputHandling(unittest.TestCase):
             self.assertEqual(get_int_input(i, True), 'Error: Please enter a positive whole number: ')
             self.assertEqual(get_int_input(i, False), 'Error: Please enter a positive, non zero, whole number: ')  
 
+    ############### Float-related tests ############### 
     def test_float_pos(self):
         pos_floats = ["1.0", "2.1", "10.21", "20.321", "250.4321", "1050.54321"]
         for i in pos_floats: 
@@ -70,6 +72,7 @@ class TestInputHandling(unittest.TestCase):
             self.assertEqual(get_float_input(i, True), 'Error: Please enter a positive number: ')
             self.assertEqual(get_float_input(i, False), 'Error: Please enter a positive, non zero, number: ')  
 
+    ############### Shape-related tests ############### 
     def test_area_square(self):
         lengths = [1, 10, 100, 1000, 10000]   
         square = Shape.SQUARE
@@ -77,7 +80,6 @@ class TestInputHandling(unittest.TestCase):
         for length in lengths:
             self.assertEqual(square(length), length * length)
         
-    
     def test_area_rectangle(self):
         heights = [1, 10, 100, 1000, 10000]   
         widths = [1, 10, 100, 1000, 10000]  
@@ -129,13 +131,33 @@ class TestInputHandling(unittest.TestCase):
   
         for radi in radis:
             self.assertEqual(scirc(radi), (math.pi * pow(radi, 2)) // 2)
+            
+    def test_string_to_shape(self):
+        self.assertEqual(Shape.to_shape('square'), Shape.SQUARE)
+        self.assertEqual(Shape.to_shape('rectangle'), Shape.RECTANGLE)
+        self.assertEqual(Shape.to_shape('parallelogram'), Shape.PARALLELOGRAM)
+        self.assertEqual(Shape.to_shape('trapezoid'), Shape.TRAPEZOID)
+        self.assertEqual(Shape.to_shape('triangle'), Shape.TRIANGLE)
+        self.assertEqual(Shape.to_shape('ellipse'), Shape.ELLIPSE)
+        self.assertEqual(Shape.to_shape('circle'), Shape.CIRCLE)
+        self.assertEqual(Shape.to_shape('semicircle'), Shape.SEMICIRCLE)
+        
+        self.assertEqual(Shape.to_shape('foobar'), None)
+        self.assertEqual(Shape.to_shape('SQUARE'), None)
+        self.assertEqual(Shape.to_shape('RECTANGLE'), None)
+        self.assertEqual(Shape.to_shape('PARALLELOGRAM'), None)
+        self.assertEqual(Shape.to_shape('TRAPEZOID'), None)
+        self.assertEqual(Shape.to_shape('TRIANGLE'), None)
+        self.assertEqual(Shape.to_shape('ELLIPSE'), None)
+        self.assertEqual(Shape.to_shape('CIRCLE'), None)
+        self.assertEqual(Shape.to_shape('SEMICIRCLE'), None)
     
 
 
 
 
 #########################################################################################
-############################## Methods being tested #####################################
+########################### Methods/Classes being tested ###############################
 #########################################################################################
 """Methods have been altered to remove the GUI elements
 Now. they Just return a string used which reference "branch" has been addressed
@@ -186,9 +208,6 @@ class Shape(Enum):
             case _:
                 return None
 
-
-
-
 def get_float_input(usr_input, allow_zero):
     """ Returns a provided string input as a float. 
     When called, you can specify if you want the a valid input to be non-zero, or if zero can be included. 
@@ -220,7 +239,6 @@ def get_float_input(usr_input, allow_zero):
     elif valid_input:
         return "Valid Input"
 
-    
 def get_int_input(usr_input, allow_zero):
     """ Returns a provided string input as a float. 
     When called, you can specify if you want the a valid input to be non-zero, or if zero can be included. 

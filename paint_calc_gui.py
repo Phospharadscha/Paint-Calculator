@@ -23,11 +23,11 @@ class Shape(Enum):
     SQUARE = lambda b: pow(b, 2)
     RECTANGLE = lambda b, h: b * h
     PARALLELOGRAM = lambda b, h: b * h
-    TRAPEZOID = lambda b, h, a: ((a + b) // 2) * h
+    TRAPEZOID = lambda b, h, a: ((a + b) / 2) * h
     TRIANGLE = lambda b, h: 0.5 * (b * h)
     ELLIPSE = lambda b, a: math.pi * (a*b)
     CIRCLE = lambda r: math.pi * pow(r, 2)
-    SEMICIRCLE = lambda r: (math.pi * pow(r, 2)) // 2
+    SEMICIRCLE = lambda r: (math.pi * pow(r, 2)) / 2
     
     def __call__(self, args):
         """Override the usual call method to instead allow for the supplying of a variety of multiple args.
@@ -203,14 +203,14 @@ class Wall(Architecture):
                 num_of_values = 1
                 layout = [
                     [sg.Text("Please enter the details for this wall:")], 
-                    [sg.Text("Enter the radius the wall:")], 
+                    [sg.Text("Enter the radius the wall in meters::")], 
                     [sg.Multiline(size=(30,1), key='val1')]
                 ]
             case _: # Default case is a square
                 num_of_values = 1 
                 layout = [
                     [sg.Text("Please enter the details of this wall:")], 
-                    [sg.Text("Enter the length of one side of the wall:")], 
+                    [sg.Text("Enter the length of one side of the wall in meters:")], 
                     [sg.Multiline(size=(30,1), key='val1')]     
                 ]
         
@@ -269,10 +269,10 @@ class Wall(Architecture):
         """Returns the amount of paint required to cover the wall. 
         """
         import math
-        litres_required = (self.__surface_area * self.__coats) // self.__paint(2)
+        litres_required = (self.__surface_area * self.__coats) / self.__paint(2)
         
         # Value is rounded up, since you can't purchase .something of a bucket. 
-        b_req = math.ceil(litres_required // self.__paint(1))
+        b_req = math.ceil(litres_required / self.__paint(1))
         if b_req == 0:  b_req += 1 
         
         return b_req
@@ -567,8 +567,8 @@ class Calculator():
 
             # Present the final screen where the user can get the results
             self.__final_screen()
-
-        
+            # Delete the variables created this loop to clear memory. 
+            self.__rooms = []
 
     def __final_screen(self): 
         '''This is the final window.
@@ -666,7 +666,7 @@ class Calculator():
         # Generate a layout so that the correct number of paints are displayed.     
         temp_layout = [[sg.Text("Total of each paint used can be found below. Along with a margin of error of 10 percent")]]
         for key, value in total_paint.items():
-            margin_error = float(value // 10)
+            margin_error = value / 10.0
             temp_layout.append([sg.Text("Total %s: %.0f buckets (± %.2f buckets)" % (key.name.title(), value, margin_error))])
         temp_layout.append( [sg.Button("OK")])
         
@@ -684,7 +684,6 @@ class Calculator():
                     temp_window.close()
                     break
         
-
     def __per_room(self):
         '''This method allows the user to view a list of rooms they have specified
         They can then select a room, and view information on that room.
@@ -724,7 +723,6 @@ class Calculator():
                             self.__room_info(room)
                             temp_window.Enable()
         
-
     def __room_info(self, room):
         '''Allows the user to view individual information on each room
         '''
@@ -777,7 +775,7 @@ class Calculator():
                     # Create a layout to display each used paint and the amount required
                     temp_layout = [[sg.Text("Total of each paint used can be found below. Along with a margin of error of 10 percent")]]
                     for key, value in total_paint.items():
-                        margin_error = float(value // 10)
+                        margin_error = value / 10.0
                         temp_layout.append([sg.Text("Total %s: %.0f buckets (± %.2f buckets)" % (key.name.title(), value, margin_error))])
                     temp_layout.append( [sg.Button("OK")])
 
@@ -800,10 +798,7 @@ class Calculator():
                 case _: 
                     window.close()
                     break
-                
-        
-       
-       
+                   
     def __get_rooms(self): 
         '''Get the number of rooms which are being painted
         '''
@@ -827,7 +822,6 @@ class Calculator():
                 case _: 
                     pass
         
-
 #########################################################################################
 ############################## Error - Handling #########################################
 #########################################################################################
