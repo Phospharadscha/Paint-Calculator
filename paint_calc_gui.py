@@ -264,7 +264,7 @@ class Wall(Architecture):
             self.__area_with_obstacles
         window.close()
     
-    def __required_buckets(self):
+    def required_buckets(self):
         """Returns the amount of paint required to cover the wall. 
         """
         import math
@@ -282,7 +282,6 @@ class Wall(Architecture):
     def get_paint(self): 
         """Returns the paint used on the wall. 
         """
-        
         return self.__paint
     
     def __area_with_obstacles(self):
@@ -656,13 +655,17 @@ class Calculator():
         # This is stored as a dictionary, with the {Paint: total cost}
         total_paint = {}
         for room in self.__rooms:
-            for wall in room.get_walls():          
-                total_paint[wall.get_paint()] += wall.required_buckets()
+            for wall in room.get_walls():  
+                keys = total_paint.keys()
+                if wall.get_paint() in keys:
+                    total_paint[wall.get_paint()] += wall.required_buckets()
+                else: 
+                    total_paint[wall.get_paint()] = wall.required_buckets()
             
         # Generate a layout so that the correct number of paints are displayed.     
         temp_layout = []
         for key, value in total_paint.items():
-            temp_layout.append([sg.Text("Total %s: %.2f litres" % (key.to_string(), value))])
+            temp_layout.append([sg.Text("Total %s: %.2f litres" % (key.name.title(), value))])
         temp_layout.append( [sg.Button("OK")])
         
         # Create new popup window to display result 
@@ -761,15 +764,18 @@ class Calculator():
         
                     # Get the paint used in each room and add it
                     for room in self.__rooms:
-                        for wall in room.get_walls():
-                            paint_colour = wall.get_paint()            
-                            total_paint[wall.get_paint()] = wall.required_buckets()
+                        for wall in room.get_walls():  
+                            keys = total_paint.keys()
+                            if wall.get_paint() in keys:
+                                total_paint[wall.get_paint()] += wall.required_buckets()
+                            else: 
+                                total_paint[wall.get_paint()] = wall.required_buckets()
 
                     
                     # Create a layout to display each used paint and the amount required
                     temp_layout = []
                     for key, value in total_paint.items():
-                        temp_layout.append([sg.Text("Total %s: %.2f litres" % (key.to_string(), value))])
+                        temp_layout.append([sg.Text("Total %s: %.2f litres" % (key.name.title(), value))])
                     temp_layout.append( [sg.Button("OK")])
 
                     # Create popup window to display information
@@ -843,12 +849,15 @@ def get_float_input(usr_input, allow_zero):
             valid_input = False
 
         # If the input is invalid, or if it's valid but less than 0, then:
-        if not valid_input or user_input < 0:
-            text = "'Error: Please enter a positive, "
+        if not valid_input or user_input < 0 or user_input == 0:
+            if allow_zero and user_input == 0:
+                return user_input
+            
+            text = "'Error: Please enter a positive"
              # Alter string if zero is not allowed as a valid input
             if not allow_zero:
-                text += "non zero, "
-            text += "number: "
+                text += ", non zero,"
+            text += " number: "
             
             # Create new window asking for corrected input
             layout = [[sg.Text(text)], [sg.Multiline(size=(30,1), key='textbox')], [sg.Button("CONFIRM")], [sg.Button("CLOSE")]]
@@ -889,12 +898,15 @@ def get_int_input(usr_input, allow_zero):
             valid_input = False
 
         # If the input is invalid, or if it's valid but less than 0, then:
-        if not valid_input or user_input < 0:
-            text = "'Error: Please enter a positive, "
+        if not valid_input or user_input < 0 or user_input == 0 :
+            if allow_zero and user_input == 0:
+                return user_input
+            
+            text = "'Error: Please enter a positive"
             # Alter string if zero is not allowed as a valid input
             if not allow_zero:
-                text += "non zero, "
-            text += "whole number: "
+                text += ", non zero,"
+            text += " whole number: "
             
             # Create new window asking for corrected input
             layout = [[sg.Text(text)], [sg.Multiline(size=(30,1), key='textbox')], [sg.Button("CONFIRM")], [sg.Button("CLOSE")]]
