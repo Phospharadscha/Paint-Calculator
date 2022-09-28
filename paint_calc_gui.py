@@ -36,6 +36,7 @@ class Shape(Enum):
     def to_shape(self, shape_name):
         """This is a class method, meaning it does not need to be called on a Shape object.
         The method is passed a string, which it will then attempt to return a matching shape for.  
+        Error handling is not needed, because the user will only ever select from a drop down. 
         """
         match shape_name:
             case "square":
@@ -61,6 +62,7 @@ class Shape(Enum):
 class Paint(Enum):
     """Paints are stored by their colour, with the value being the:
     (Price per bucket, litres per bucket, coverage per litre)
+    Error handling is not needed, because the user will only ever select from a drop down.
     """
     EMERALD = (24, 2.5, 13)
     SAPPHIRE = (20, 2.5, 13)
@@ -115,7 +117,6 @@ class Architecture():
         """This area is used to calculate the area of an Architecture object.  
         It takes a provided shape (the shape of the architecture object), and its dimensions. 
         """
-        
         surface_area = 0
         
         # It uses the provided shape to call the lambda function assigned with it to calculate area. 
@@ -219,7 +220,7 @@ class Wall(Architecture):
         )
         
         # Draw the new window 
-        window = sg.Window("Paint Calculator", layout)
+        window = sg.Window("Wall Definition" , layout)
         
         dimensions = []
         coats = 0
@@ -290,104 +291,118 @@ class Wall(Architecture):
         for obstacle in self.__obstacles:
             self.__surface_area -= obstacle._area()
 
-# Windows, Doors, etc. 
 class Obstacle(Architecture): 
-    def define(self, index, total_num):        
+    """Obstacle is a child of the Architecture() class. 
+    Obstacles would be anything on the wall that cannot be painted. Such as doors or windows. 
+    The user is never asked to specify what the obstacle is, because it ultimately doesn't matter. 
+    What matters, is the shape of the obstacle.
+    """
+    
+    def define(self, index, total_num):
+        """Like in the Wall() class, define is used here to retrieve information about the obstacle. 
+        """
+        
+        # Valid Shapes     
         shape_types = ["Square", "Rectangle", "Parallelogram", "Trapezoid", "Triangle", "Ellipse", "Circle", "Semicircle"]
         
         layout = [
                 [sg.Text("Obstacle No.%d of %d" % (index, total_num))], 
-                [sg.Text("Please enter the details of this obstacle:")], 
+                [sg.Text("Please enter the details for this obstacle:")], 
                 [sg.Text("Please select the shape of the obstacle from the drop down menu: ")], 
                 [sg.OptionMenu(values=shape_types,size=(30,8), default_value='Square',key='shape')],
                 [sg.Button("CONFIRM")],
                 [sg.Button("CLOSE")]
             ] 
         
-        window = sg.Window("Paint Calculator", layout)
-
+        # Create a window and keep it open until a valid interaction is given. 
+        window = sg.Window("Obstacle Definition", layout)
         while True:
             event, values = window.read()
             match event:
                 case "CONFIRM":
+                    # When the user clicks confirm, convert the input into a shape object
                     shape = Shape.to_shape(values['shape'].lower())
                     break 
-                case None:
-                    sys.exit()
-                case "CLOSE":
+                case None | "CLOSE":
                     sys.exit()
                 case _: 
                     pass
         
+        # Freeze the window so the user cannot interact with it.
+        # This is because we will be making a new window, and do not want them to interact with this current one whilst it is open. 
         window.Disable()
         self.__define_area(shape)   
         window.close()
         
     def __define_area(self, shape):
+        '''This is used to define the area of the obstacle.
+        The area itself is calculated within the Shape object.
+        '''
+        
+        # Generate different window layouts depending upon the shape. 
         match shape:
             case Shape.RECTANGLE | Shape.PARALLELOGRAM | Shape.TRIANGLE:
                 num_of_values = 2 
                 layout = [
-                    [sg.Text("Please enter the details of this obstacle:")], 
-                    [sg.Text("Enter the length of the base of the obstacle:")], 
+                    [sg.Text("Please enter the details for this obstacle:")], 
+                    [sg.Text("Enter the length of the base of the obstacle in metres:")], 
                     [sg.Multiline(size=(30,1), key='val1')], 
                     [sg.Text("Enter the height of the obstacle:")], 
                     [sg.Multiline(size=(30,1), key='val2')], 
-                    [sg.Button("CONFIRM")],
-                    [sg.Button("CLOSE")]
                 ]
             case Shape.TRAPEZOID:
                 num_of_values = 3 
                 layout = [
-                    [sg.Text("Please enter the details of this obstacle:")], 
-                    [sg.Text("Enter the length of the base of the obstacle:")], 
+                    [sg.Text("Please enter the details for this obstacle:")], 
+                    [sg.Text("Enter the length of the base of the obstacle in metres::")], 
                     [sg.Multiline(size=(30,1), key='val1')],
-                    [sg.Text("Enter the height of the obstacle:")], 
+                    [sg.Text("Enter the height of the obstacle in metres::")], 
                     [sg.Multiline(size=(30,1), key='val2')], 
-                    [sg.Text("Enter the length of the top of the obstacle:")], 
+                    [sg.Text("Enter the length of the top of the obstacle in metres::")], 
                     [sg.Multiline(size=(30,1), key='val3')],  
-                    [sg.Button("CONFIRM")],
-                    [sg.Button("CLOSE")]
                 ]
             case Shape.ELLIPSE:
                 num_of_values = 2
                 layout = [
-                    [sg.Text("Please enter the details of this obstacle:")], 
-                    [sg.Text("Enter the vertical radius the obstacle:")], 
+                    [sg.Text("Please enter the details for this obstacle:")], 
+                    [sg.Text("Enter the vertical radius the obstacle in metres::")], 
                     [sg.Multiline(size=(30,1), key='val1')],
-                    [sg.Text("Enter the horizontal radius the obstacle:")], 
+                    [sg.Text("Enter the horizontal radius the obstacle in metres::")], 
                     [sg.Multiline(size=(30,1), key='val2')], 
-                    [sg.Button("CONFIRM")],
-                    [sg.Button("CLOSE")]
                 ]
             case Shape.CIRCLE | Shape.SEMICIRCLE:
                 num_of_values = 1
                 layout = [
-                    [sg.Text("Please enter the details of this obstacle:")], 
-                    [sg.Text("Enter the radius the obstacle:")], 
+                    [sg.Text("Please enter the details for this obstacle in metres::")], 
+                    [sg.Text("Enter the radius the obstacle in metres::")], 
                     [sg.Multiline(size=(30,1), key='val1')],
-                    [sg.Button("CONFIRM")],
-                    [sg.Button("CLOSE")]
                 ]
             case _: # Default case is a square
                 num_of_values = 1 
                 layout = [
-                    [sg.Text("Please enter the details of this obstacle:")], 
-                    [sg.Text("Enter the length of one side of the obstacle:")], 
+                    [sg.Text("Please enter the details for this obstacle in metres::")], 
+                    [sg.Text("Enter the length of one side of the obstacle in metres::")], 
                     [sg.Multiline(size=(30,1), key='val1')], 
-                    [sg.Button("CONFIRM")],
-                    [sg.Button("CLOSE")]
                 ]     
         
+        # These buttons are shared regardless of the shape. So they are appended afterwards. 
+        layout.append(
+            [sg.Button("CONFIRM")],
+            [sg.Button("CLOSE")]
+        )
+        
+        # Create a new window with the above layout. 
         window = sg.Window("Paint Calculator", layout)
         
         dimensions = []
         coats = 0
-                
+        
+        # Keep the window open until a valid interaction is made.       
         while True:
           event, values = window.read()
           match event:
               case "CONFIRM":
+                # If the user clicks confirm, then attempt to get their inputs what they entered. 
                 if num_of_values == 1:
                     dimensions.append(get_float_input(values['val1'], False))
                 elif num_of_values == 2:
@@ -402,12 +417,12 @@ class Obstacle(Architecture):
                   sys.exit()
               case _: 
                  pass
-             
+        
+        # The surface area of the obstacle is calculated and assigned. 
         window.Disable()        
         self.__surface_area = self._calc_area(shape, dimensions)
         window.close()
 
-# Rooms
 class Room():
     def __init__(self):
         self.__walls = []
