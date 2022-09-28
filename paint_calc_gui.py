@@ -1,6 +1,8 @@
 from abc import abstractmethod
 from asyncio import constants
+from email.utils import parseaddr
 from enum import Enum
+from functools import total_ordering
 import math
 from tkinter import Button 
 
@@ -62,6 +64,10 @@ class Paint(Enum):
                 return Paint.GREEN
             case _:
                 return None
+            
+    def to_string(self):
+        return self.name.lower()
+            
 
 ##### Classes ##### 
 # Architecture (Walls, doors, windows, etc)
@@ -102,8 +108,8 @@ class Wall(Architecture):
         import sys
         
         num_of_values = 0 
-        
-        self.__obstacles = [Obstacle()] * num_of_obstacles
+        for i in range(0, num_of_obstacles):
+            self.__obstacles.append(Obstacle())
         obstacle_index = 1
         
         for obstacle in self.__obstacles:
@@ -207,6 +213,8 @@ class Wall(Architecture):
         
         window.Disable()
         self.__surface_area = self._calc_area(shape, dimensions)
+        if len(self.__obstacles) != 0: 
+            self.__area_with_obstacles
         window.close()
     
     def required_buckets(self):
@@ -219,7 +227,7 @@ class Wall(Architecture):
     def get_paint(self): 
         return self.__paint
     
-    def __area_without_obstacles(self):
+    def __area_with_obstacles(self):
         for obstacle in self.__obstacles:
             self.__surface_area -= obstacle.area()
 
@@ -361,6 +369,16 @@ class Room():
     
     def get_name(self):
         return self.__name
+    
+    def get_cost(self):
+        total_cost = 0
+        for wall in self.__walls:
+            total_cost += wall.get_cost()
+            
+        return total_cost
+        
+    def get_paint(self):
+        pass
         
     def define(self, room_index):
         import PySimpleGUI as sg
@@ -387,7 +405,9 @@ class Room():
                 case "CONFIRM":
                     self.__name = values['name']
                     window.Disable()
-                    self.__walls = [Wall()] * get_int_input(values['walls'], False)
+                    num_of_rooms = get_int_input(values['walls'], False)
+                    for i in range(0, num_of_rooms):
+                        self.__walls.append(Wall()) 
                     break 
                 case None | "CLOSE":
                     sys.exit()
@@ -450,7 +470,7 @@ class Calculator():
         self.__rooms = self.__get_rooms()
         
         room_index = 1
-        for room in self.__rooms: 
+        for room in self.__rooms:
             room.define(room_index)
             room_index += 1
         
@@ -519,25 +539,19 @@ class Calculator():
     def __total_paint(self):
         import PySimpleGUI as sg
         
-        total_red_paint = 0
-        total_green_paint = 0
-        total_blue_paint = 0
+        total_paint = {}
         
         for room in self.__rooms:
             for wall in room.get_walls():
-                if wall.get_paint() == Paint.RED:
-                    total_red_paint += wall.required_buckets()
-                elif wall.get_paint() == Paint.GREEN:    
-                    total_green_paint += wall.required_buckets()
-                elif wall.get_paint() == Paint.BLUE:
-                    total_blue_paint += wall.required_buckets()
+                paint_colour = wall.get_paint()            
+                total_paint[wall.get_paint()] = wall.required_buckets()
                 
-        temp_layout = [
-            [sg.Text("Total Red: %.2f" % total_red_paint)], 
-            [sg.Text("Total Blue: %.2f" % total_green_paint)], 
-            [sg.Text("Total Green: %.2f" % total_blue_paint)], 
-            [sg.Button("OK")]
-        ]
+        temp_layout = []
+        
+        for key, value in total_paint.items():
+            temp_layout.append([sg.Text("Total %s: %.2f" % (key.to_string(), value))])
+        temp_layout.append( [sg.Button("OK")])
+        
         temp_window = sg.Window("Total Paint", temp_layout)
         while True:
             event, values = temp_window.read()
@@ -581,7 +595,69 @@ class Calculator():
         
 
     def __room_info(self, room):
-        print("Room: %s" % room.get_name())
+        import PySimpleGUI as sg 
+        
+        layout = [
+            [sg.Text("Room: %s" % room.get_name())], 
+            [sg.Button("Cost")],
+            [sg.Button("Paint")],
+            [sg.Button("CLOSE")]
+        ]
+        
+        window = sg.Window("Per Room", layout)
+        while True:
+            event, values = window.read()
+            match event:
+                case "Cost":
+                    cost = room.get_cost()
+                    temp_layout = [
+                        [sg.Text("Total Cost: %.2f" % cost)], 
+                        [sg.Button("OK")]
+                    ] 
+        
+                    temp_window = sg.Window("Total Cost", temp_layout)
+                    while True:
+                        event, values = temp_window.read()
+                        match event:
+                            case None | "OK":
+                                temp_window.close()
+                                break
+                            case _: 
+                                temp_window.close()
+                                break
+                case "Paint":
+                    total_paint = {}
+        
+                    for room in self.__rooms:
+                        for wall in room.get_walls():
+                            paint_colour = wall.get_paint()            
+                            total_paint[wall.get_paint()] = wall.required_buckets()
+
+                    temp_layout = []
+
+                    for key, value in total_paint.items():
+                        temp_layout.append([sg.Text("Total %s: %.2f" % (key.to_string(), value))])
+                    temp_layout.append( [sg.Button("OK")])
+
+                    temp_window = sg.Window("Total Paint", temp_layout)
+                    while True:
+                        event, values = temp_window.read()
+                        match event:
+                            case None | "OK":
+                                temp_window.close()
+                                break
+                            case _: 
+                                temp_window.close()
+                                break
+                case None | "CLOSE":
+                    window.close()
+                    break
+                case _: 
+                    window.close()
+                    break
+                
+        
+       
         
     def __get_rooms(self): 
         import PySimpleGUI as sg
@@ -596,7 +672,9 @@ class Calculator():
                 case "CONFIRM":
                     window.Disable()
                     num_of_rooms = get_int_input(values['textbox'], False)
-                    rooms = [Room()] * num_of_rooms
+                    rooms = [] 
+                    for i in range(0, num_of_rooms):
+                        rooms.append(Room())
                     window.close()
                     return rooms
                 case None | "CLOSE":
@@ -621,9 +699,12 @@ def get_float_input(usr_input, allow_zero):
         except ValueError:
             valid_input = False
 
-        if not valid_input or (not allow_zero and user_input == 0) or user_input < 0:
-            layout = [[sg.Text('Error: Please enter a positive, non-zero, whole number:')], [sg.Multiline(size=(30,5), key='textbox')], [sg.Button("CONFIRM")], [sg.Button("CLOSE")]]
-            window = sg.Window("Paint Calculator", layout) 
+        if not valid_input or user_input < 0:
+            text = "'Error: Please enter a positive, "
+            if not allow_zero:
+                text += "non zero, "
+            text += "number: "
+            layout = [[sg.Text(text)], [sg.Multiline(size=(30,1), key='textbox')], [sg.Button("CONFIRM")], [sg.Button("CLOSE")]]
         elif valid_input:
             window = sg.Window("Paint Calculator") 
             window.close()
@@ -652,9 +733,14 @@ def get_int_input(usr_input, allow_zero):
         except ValueError:
             valid_input = False
 
-        if not valid_input or (not allow_zero and user_input == 0) or user_input < 0:
-            layout = [[sg.Text('Error: Please enter a positive, non-zero, whole number:')], [sg.Multiline(size=(30,1), key='textbox')], [sg.Button("CONFIRM")], [sg.Button("CLOSE")]]
-            window = sg.Window("Paint Calculator", layout)  
+        if not valid_input or user_input < 0:
+            # append the non-zero bit here
+            text = "'Error: Please enter a positive, "
+            if not allow_zero:
+                text += "non zero, "
+            text += "whole number: "
+            layout = [[sg.Text(text)], [sg.Multiline(size=(30,1), key='textbox')], [sg.Button("CONFIRM")], [sg.Button("CLOSE")]]
+            window = sg.Window("Paint Calculator", layout) 
         elif valid_input:
             window = sg.Window("Paint Calculator") 
             window.close()
