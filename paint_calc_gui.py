@@ -46,9 +46,14 @@ class Shape(Enum):
 # Paints
 class Paint(Enum):
     # name = [price per bucket, litres per bucket, coverage per litre]
-    RED = (1.00, 1.25, 0.75)
-    BLUE = (1.25, 1.25, 0.5)
-    GREEN = (2.75, 0.75, 1.34)
+    EMERALD = (24, 2.5, 13)
+    SAPPHIRE = (20, 2.5, 13)
+    WHITE = (45, 2.5, 12)
+    BLACK = (20, 2.5, 13)
+    BERRY = (20, 2.5, 13)
+    COTTON = (10, 0.75, 16)
+    PEBBLE = (32, 5, 13)
+    IVORY = (10, 5, 13)
     
     def __call__(self, args):
         return self.value[args]
@@ -67,6 +72,7 @@ class Paint(Enum):
             
     def to_string(self):
         return self.name.lower()
+
             
 
 ##### Classes ##### 
@@ -98,7 +104,7 @@ class Architecture():
 # A wall
 class Wall(Architecture):
     def __init__(self):
-        self.__paint = Paint.RED
+        self.__paint = Paint.WHITE
         self.__surface_area = 0.0
         self.__coats = 1
         self.__obstacles = []
@@ -422,7 +428,9 @@ class Room():
         import sys
         
         shape_types = ["Square", "Rectangle", "Parallelogram", "Trapezoid", "Triangle", "Ellipse", "Circle", "Semicircle"]
-        colours = ["Red", "Green", "Blue"]
+        colours = []
+        for colour in Paint:   
+            colours.append(colour.name.title())
         
         wall_index = 1
         for wall in self.__walls:
@@ -434,7 +442,7 @@ class Room():
                     [sg.Text("Please select the shape of the wall from the drop down menu: ")], 
                     [sg.OptionMenu(values=shape_types,size=(30,8), default_value='Square',key='shape')],
                     [sg.Text("Please select the colour of the wall from the drop down menu: ")], 
-                    [sg.OptionMenu(values=colours,size=(30,8), default_value='Red',key='colour')],
+                    [sg.OptionMenu(values=colours,size=(30,8), default_value='White',key='colour')],
                     [sg.Button("CONFIRM")],
                     [sg.Button("CLOSE")]
                 ]
@@ -770,14 +778,13 @@ if __name__ == '__main__':
 # Mention what measurement is being used
 # Implement a test
     # Pytest
-# Dictionary for total paints
 
 
 
 # Assumptions :
 # Buying paint by bucket, not raw volume 
-# User will choose their own paints, and not have to select the paint from a table, or some other data storage system.
 # Distance measurements in metres
 # Liquid measurements in litres
 # This is a system that will be deployed by a company. They will specify what paints are available.
     # User does not specify paints
+# User does specify how many coats they intend to apply
