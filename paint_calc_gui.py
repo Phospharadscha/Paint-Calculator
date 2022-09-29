@@ -1,5 +1,5 @@
 #########################################################################################
-##################################### Imports #############################################
+##################################### Imports ###########################################
 #########################################################################################
 from abc import abstractmethod
 from enum import Enum
@@ -13,7 +13,6 @@ icon_logo = "icon.png"
 ##################################### Enums #############################################
 #########################################################################################
 
-# Shapes
 class Shape(Enum):
     """Shapes store a lambda function used to evaluate their area
     They can then be easily calculated if I store a shape object on a wall/obstacles/etc. 
@@ -59,7 +58,6 @@ class Shape(Enum):
             case _:
                 return None
 
-# Paints
 class Paint(Enum):
     """Paints are stored by their colour, with the value being the:
     (Price per bucke (GBP), litres per bucket, coverage per litre (m^2))
@@ -821,7 +819,7 @@ class Calculator():
                     pass
         
 #########################################################################################
-############################## Error - Handling #########################################
+############################## Input Validation #########################################
 #########################################################################################
 
 def get_float_input(usr_input, allow_zero):

@@ -85,7 +85,7 @@ class TestShapes(unittest.TestCase):
         self.assertEqual(Shape.to_shape('ELLIPSE'), None)
         self.assertEqual(Shape.to_shape('CIRCLE'), None)
         self.assertEqual(Shape.to_shape('SEMICIRCLE'), None)
-    
+
 class TestInputHandling(unittest.TestCase):
     
     ############### Integer-related tests ############### 
